@@ -54,7 +54,6 @@ public class ProductosController {
         return productosDAO.obtenerProductosPorDebajoDelStockMinimo();
     }
 
-    // Validaciones básicas para el objeto Productos antes de insertar o actualizar
     private void validarProducto(Productos producto, boolean esNuevo) {
         if (producto == null) {
             throw new IllegalArgumentException("El producto no puede ser null");
