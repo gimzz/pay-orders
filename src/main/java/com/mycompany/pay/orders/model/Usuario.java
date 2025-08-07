@@ -28,10 +28,6 @@ import java.time.LocalDateTime;
         this.rol = rol;
         this.activo = activo;
         this.fechaCreacion = fechaCreacion;
-        
-        
-        
-        
     }
 
     
