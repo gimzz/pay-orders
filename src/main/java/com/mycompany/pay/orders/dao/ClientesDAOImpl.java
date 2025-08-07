@@ -27,14 +27,14 @@ public class ClientesDAOImpl implements ClientesDAO {
     }
 
     @Override
-    public void agregarCliente(Clientes cliente) throws SQLException {
+    public void agregarCliente(Clientes clientes) throws SQLException {
         String sql = "INSERT INTO system.clientes (cedula, nombre, apellido, telefono, fecha_registro) VALUES (?,?,?,?,?)";
         try (PreparedStatement ps = this.connection.prepareStatement(sql)) {
-            ps.setInt(1, cliente.getCedula());
-            ps.setString(2, cliente.getNombre());
-            ps.setString(3, cliente.getApellido());
-            ps.setString(4, cliente.getTelefono());
-            LocalDateTime fechaRegistro = cliente.getFechaRegistro();
+            ps.setInt(1, clientes.getCedula());
+            ps.setString(2, clientes.getNombre());
+            ps.setString(3, clientes.getApellido());
+            ps.setString(4, clientes.getTelefono());
+            LocalDateTime fechaRegistro = clientes.getFechaRegistro();
             if (fechaRegistro != null) {
                 ps.setTimestamp(5, Timestamp.valueOf(fechaRegistro));
             } else {
@@ -102,14 +102,14 @@ public class ClientesDAOImpl implements ClientesDAO {
     }
 
     @Override
-    public void actualizarCliente(Clientes cliente) throws SQLException {
+    public void actualizarCliente(Clientes clientes) throws SQLException {
         String sql = "UPDATE system.clientes SET cedula=?, nombre=?, apellido=?, telefono=? WHERE id=?";
         try (PreparedStatement ps = this.connection.prepareStatement(sql)) {
-            ps.setInt(1, cliente.getCedula());
-            ps.setString(2, cliente.getNombre());
-            ps.setString(3, cliente.getApellido());
-            ps.setString(4, cliente.getTelefono());
-            ps.setInt(5, cliente.getId());
+            ps.setInt(1, clientes.getCedula());
+            ps.setString(2, clientes.getNombre());
+            ps.setString(3, clientes.getApellido());
+            ps.setString(4, clientes.getTelefono());
+            ps.setInt(5, clientes.getId());
             ps.executeUpdate();
         }
 

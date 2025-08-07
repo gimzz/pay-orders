@@ -15,7 +15,7 @@ public interface ClientesDAO {
     void agregarCliente(Clientes cliente) throws SQLException;
     Clientes obtenerClientePorId(int id) throws SQLException;
     List<Clientes> obtenerTodosLosClientes() throws SQLException;
-    void actualizarCliente(Clientes cliente) throws SQLException;
+    void actualizarCliente(Clientes clientes) throws SQLException;
     void eliminarCliente(int id) throws SQLException;
     
 }
