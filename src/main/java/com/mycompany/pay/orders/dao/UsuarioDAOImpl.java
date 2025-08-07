@@ -1,8 +1,4 @@
 package com.mycompany.pay.orders.dao;
-
-import com.mycompany.pay.orders.model.Usuario;
-import com.mycompany.pay.orders.model.Rol;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,16 +7,18 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.mycompany.pay.orders.model.Rol;
+import com.mycompany.pay.orders.model.Usuario;
+
 
 //METODOS
 public class UsuarioDAOImpl implements UsuarioDAO {
-
     private Connection connection;
 
+    
     public UsuarioDAOImpl(Connection connection) {
         this.connection = connection;
     }
-
     @Override
    public void agregarUsuario(Usuario usuario) throws SQLException {
     String sql = "INSERT INTO system.usuarios (nombre_usuario, password_usuario, rol, activo, fecha_creacion) VALUES (?, ?, ?::rol_enum, ?, ?)";
@@ -50,7 +48,6 @@ public class UsuarioDAOImpl implements UsuarioDAO {
                         rs.getTimestamp("fecha_creacion").toLocalDateTime()
                     );
                 } else {
-                    System.out.print("El usuario con ese id no existe");
                     return null;
                 }
             }
