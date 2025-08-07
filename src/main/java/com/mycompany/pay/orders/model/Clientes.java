@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
  * @author gimz
  */
 public class Clientes {
+
     private int id;
     private int cedula;
     private String nombre;
@@ -26,8 +27,9 @@ public class Clientes {
         this.telefono = telefono;
         this.fechaRegistro = fechaRegistro;
     }
-    
-    public Clientes(){}
+
+    public Clientes() {
+    }
 
     public int getId() {
         return id;
@@ -42,6 +44,10 @@ public class Clientes {
     }
 
     public void setCedula(int cedula) {
+        if (cedula <= 0) {
+            throw new IllegalArgumentException("La cedula debe ser mayor a cero (0)");
+        }
+
         this.cedula = cedula;
     }
 
@@ -50,7 +56,13 @@ public class Clientes {
     }
 
     public void setNombre(String nombre) {
-        this.nombre = nombre;
+        if (nombre == null || nombre.trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre no puede ser vacío");
+        }
+        if (!nombre.matches("^[a-zA-ZÁÉÍÓÚáéíóúÑñ ]+$")) {
+            throw new IllegalArgumentException("El nombre no puede contener caracteres especiales ni números");
+        }
+        this.nombre = nombre.trim();
     }
 
     public String getApellido() {
@@ -58,6 +70,12 @@ public class Clientes {
     }
 
     public void setApellido(String apellido) {
+        if (apellido == null || apellido.trim().isEmpty()) {
+            throw new IllegalArgumentException("El apellido no puede ser vacío");
+        }
+        if (!apellido.matches("^[a-zA-ZÁÉÍÓÚáéíóúÑñ ]+$")) {
+            throw new IllegalArgumentException("El apellido no puede contener caracteres especiales ni números");
+        }
         this.apellido = apellido;
     }
 
@@ -74,11 +92,10 @@ public class Clientes {
     }
 
     public void setFechaRegistro(LocalDateTime fechaRegistro) {
+        if (fechaRegistro != null && fechaRegistro.isAfter(LocalDateTime.now())) {
+            throw new IllegalArgumentException("La fecha de registro no puede ser futura");
+        }
         this.fechaRegistro = fechaRegistro;
     }
-    
-    
-    
 
-    
 }
