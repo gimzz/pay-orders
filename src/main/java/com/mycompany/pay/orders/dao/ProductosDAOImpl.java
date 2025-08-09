@@ -63,6 +63,19 @@ public class ProductosDAOImpl implements ProductosDAO {
 
     }
 
+    public BigDecimal obtenerPrecioUnitarioProducto(int id) throws SQLException {
+        String sql = "SELECT precio_usd FROM system.productos WHERE id = ?";
+        try (PreparedStatement ps = this.connection.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getBigDecimal("precio_usd");
+                }
+            }
+        }
+        return BigDecimal.ZERO;
+    }
+
     @Override
     public List<Productos> obtenerTodosLosProductos() throws SQLException {
         List<Productos> listaProductos = new ArrayList<>();
@@ -102,7 +115,8 @@ public class ProductosDAOImpl implements ProductosDAO {
 
         }
     }
-    @Override 
+
+    @Override
     public void eliminarProducto(int id) throws SQLException {
         String sql = "DELETE FROM system.productos where id = ? ";
         try (PreparedStatement ps = this.connection.prepareStatement(sql)) {
