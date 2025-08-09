@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -27,25 +28,34 @@ public class ClientesDAOImpl implements ClientesDAO {
     }
 
     @Override
-    public void agregarCliente(Clientes clientes) throws SQLException {
+    public void agregarCliente(Clientes cliente) throws SQLException {
         String sql = "INSERT INTO system.clientes (cedula, nombre, apellido, telefono, fecha_registro) VALUES (?,?,?,?,?)";
-        try (PreparedStatement ps = this.connection.prepareStatement(sql)) {
-            ps.setInt(1, clientes.getCedula());
-            ps.setString(2, clientes.getNombre());
-            ps.setString(3, clientes.getApellido());
-            ps.setString(4, clientes.getTelefono());
-            LocalDateTime fechaRegistro = clientes.getFechaRegistro();
+        try (PreparedStatement ps = this.connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, cliente.getCedula());
+            ps.setString(2, cliente.getNombre());
+            ps.setString(3, cliente.getApellido());
+            ps.setString(4, cliente.getTelefono());
+            LocalDateTime fechaRegistro = cliente.getFechaRegistro();
             if (fechaRegistro != null) {
                 ps.setTimestamp(5, Timestamp.valueOf(fechaRegistro));
             } else {
                 ps.setNull(5, java.sql.Types.TIMESTAMP);
             }
 
-            ps.executeUpdate();
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Crear cliente falló, no se insertó ningún registro.");
+            }
+
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    cliente.setId(generatedKeys.getInt(1));
+                } else {
+                    throw new SQLException("No se obtuvo el ID generado para el cliente.");
+                }
+            }
         }
-
     }
-
     @Override
     public Clientes obtenerClientePorId(int id) throws SQLException {
         String sql = "SELECT * FROM system.clientes  where id = ?";
