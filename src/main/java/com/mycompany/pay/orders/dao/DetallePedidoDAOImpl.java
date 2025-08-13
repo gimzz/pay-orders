@@ -17,7 +17,7 @@ public class DetallePedidoDAOImpl implements DetallePedidoDAO {
     public void agregarDetalle(DetallePedido detalle) throws SQLException {
         String sql = "INSERT INTO system.detalle_pedido (id_pedido, id_producto, cantidad, precio_unitario_usd) VALUES (?, ?, ?, ?)";
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, detalle.getIdPedido());
             ps.setInt(2, detalle.getIdProducto());
             ps.setInt(3, detalle.getCantidad());
@@ -28,8 +28,13 @@ public class DetallePedidoDAOImpl implements DetallePedidoDAO {
             if (affectedRows == 0) {
                 throw new SQLException("Crear detalle de pedido falló, no se insertó ningún registro.");
             }
-        }
 
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    detalle.setId(generatedKeys.getInt(1));
+                }
+            }
+        }
     }
 
     @Override
@@ -42,6 +47,7 @@ public class DetallePedidoDAOImpl implements DetallePedidoDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     DetallePedido detalle = new DetallePedido();
+                    detalle.setId(rs.getInt("id"));  // Aquí seteamos el PK
                     detalle.setIdPedido(rs.getInt("id_pedido"));
                     detalle.setIdProducto(rs.getInt("id_producto"));
                     detalle.setCantidad(rs.getInt("cantidad"));
@@ -53,6 +59,7 @@ public class DetallePedidoDAOImpl implements DetallePedidoDAO {
         }
         return detalles;
     }
+
 
     @Override
     public void eliminarDetalle(int idDetalle) throws SQLException {
@@ -68,17 +75,16 @@ public class DetallePedidoDAOImpl implements DetallePedidoDAO {
     }
 
     public void actualizarDetalle(DetallePedido detalle) throws SQLException {
-        String sql = "UPDATE system.detalle_pedido SET cantidad = ?, precio_unitario_usd = ? WHERE id_pedido = ? AND id_producto = ?";
+        String sql = "UPDATE system.detalle_pedido SET cantidad = ?, precio_unitario_usd = ? WHERE id = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, detalle.getCantidad());
             ps.setBigDecimal(2, detalle.getPrecioUnitario());
-            ps.setInt(3, detalle.getIdPedido());
-            ps.setInt(4, detalle.getIdProducto());
+            ps.setInt(3, detalle.getId());
 
             int filasActualizadas = ps.executeUpdate();
             if (filasActualizadas == 0) {
-                throw new SQLException("No se encontró ningún detalle para actualizar.");
+                throw new SQLException("No se encontró ningún detalle con id " + detalle.getId() + " para actualizar.");
             }
         }
     }
