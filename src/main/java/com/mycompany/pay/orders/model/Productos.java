@@ -9,17 +9,21 @@ public class Productos {
     private int stockActual;
     private int stockMinimo;
     private boolean activo;
+    private Integer idCategoria;  
 
-    
     public Productos(int id, String nombre, BigDecimal precioUsd, int stockActual, int stockMinimo, boolean activo) {
-    this.id = id;
-    this.nombre = nombre;
-    this.precioUsd = precioUsd;
-    this.stockActual = stockActual;
-    this.stockMinimo = stockMinimo;
-    this.activo = activo;
+    this(id, nombre, precioUsd, stockActual, stockMinimo, activo, null);
 }
 
+    public Productos(int id, String nombre, BigDecimal precioUsd, int stockActual, int stockMinimo, boolean activo, Integer idCategoria) {
+        this.id = id;
+        this.nombre = nombre;
+        this.precioUsd = precioUsd;
+        this.stockActual = stockActual;
+        this.stockMinimo = stockMinimo;
+        this.activo = activo;
+        this.idCategoria = idCategoria;
+    }
     
     
     
@@ -72,5 +76,12 @@ public class Productos {
 
     public void setActivo(boolean activo) {
         this.activo = activo;
+    }
+        public Integer getIdCategoria() {
+        return idCategoria;
+    }
+
+    public void setIdCategoria(Integer idCategoria) {
+        this.idCategoria = idCategoria;
     }
 }
