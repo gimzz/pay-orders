@@ -1,4 +1,5 @@
 package com.mycompany.pay.orders.controller;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -17,6 +18,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
 public class LoginController {
@@ -26,14 +29,28 @@ public class LoginController {
     @FXML private Label lblMessage;
     @FXML private Button btnLogin;
 
+    @FXML private ImageView imageView;  
+
     private UsuarioController usuarioController;
 
     public LoginController() {
         try {
-Connection connection = obtenerConexionDB();
+            Connection connection = obtenerConexionDB();
             UsuarioDAO usuarioDAO = new UsuarioDAOImpl(connection);
             this.usuarioController = new UsuarioController(usuarioDAO);
         } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Método que se ejecuta al cargar el controlador, carga la imagen
+    @FXML
+    public void initialize() {
+        try {
+            Image img = new Image(getClass().getResourceAsStream("/images/fullempanada.png"));
+            imageView.setImage(img);
+        } catch (Exception e) {
+            System.out.println("No se pudo cargar la imagen: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -101,7 +118,7 @@ Connection connection = obtenerConexionDB();
             stage.setTitle("Registrar Nuevo Usuario");
             stage.show();
 
-            // Opcional: cerrar la ventana de login actual si deseas que solo una ventana esté abierta
+            // Cerrar ventana login
             Stage currentStage = (Stage) btnLogin.getScene().getWindow();
             currentStage.close();
 
@@ -121,6 +138,7 @@ Connection connection = obtenerConexionDB();
             stage.setScene(new Scene(root));
             stage.setTitle("Sistema de Pedidos - Ventana Principal");
             stage.show();
+
         } catch (IOException e) {
             e.printStackTrace();
             lblMessage.setStyle("-fx-text-fill: red;");
