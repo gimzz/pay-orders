@@ -6,6 +6,7 @@ package com.mycompany.pay.orders.dao;
 
 import com.mycompany.pay.orders.model.DetallePedido;
 import com.mycompany.pay.orders.model.Pedidos;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -23,6 +24,5 @@ void actualizarEstadoPago(int pedidoId, String estadoPago) throws SQLException;
     List<Pedidos> obtenerPedidosEntregados() throws SQLException;
     List<Pedidos> obtenerPedidosNoEntregados() throws SQLException;
     String obtenerEstadoPago(int pedidoId) throws SQLException;
-
-
+public void actualizarTotalPedido(int pedidoId, BigDecimal total) throws SQLException;
 }

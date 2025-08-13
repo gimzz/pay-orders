@@ -5,6 +5,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import com.mycompany.pay.orders.dao.PedidosDAO;
+import java.math.BigDecimal;
 
 public class PedidosDAOImpl implements PedidosDAO {
 
@@ -91,6 +92,18 @@ public String obtenerEstadoPago(int pedidoId) throws SQLException {
         }
     }
 }
+public void actualizarTotalPedido(int pedidoId, BigDecimal total) throws SQLException {
+    String sql = "UPDATE system.pedidos SET total_usd = ? WHERE id = ?";
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setBigDecimal(1, total);
+        ps.setInt(2, pedidoId);
+        int rows = ps.executeUpdate();
+        if (rows == 0) {
+            throw new SQLException("No se encontró pedido con ID " + pedidoId + " para actualizar total.");
+        }
+    }
+}
+
     
 @Override
 public void actualizarEstadoEntrega(int pedidoId, boolean entregado) throws SQLException {
