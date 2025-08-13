@@ -1,16 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
+
 
 <AnchorPane xmlns="http://javafx.com/javafx/8.0.171" 
             xmlns:fx="http://javafx.com/fxml/1" 
-fx:controller="com.mycompany.pay.orders.controller.LoginController"
-            prefWidth="600" prefHeight="400">
+            fx:controller="com.mycompany.pay.orders.controller.LoginController"
+            prefWidth="800" prefHeight="600"
+            stylesheets="@estilos/login.css"
+            styleClass="anchor-pane">
 
     <children>
-        <VBox spacing="10" layoutX="150" layoutY="100" prefWidth="300" alignment="CENTER">
+        <VBox spacing="10" prefWidth="300" alignment="CENTER"
+              AnchorPane.topAnchor="100" AnchorPane.leftAnchor="250" AnchorPane.rightAnchor="250"
+              styleClass="v-box">
             <children>
-                <Label text="Iniciar Sesión" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+<ImageView fx:id="imageView" fitHeight="150" fitWidth="150" pickOnBounds="true" preserveRatio="true"/>
+
+                <Label text="Iniciar Sesión" styleClass="label"/>
 
                 <TextField fx:id="txtUsername" promptText="Usuario" prefWidth="250" />
                 <PasswordField fx:id="txtPassword" promptText="Contraseña" prefWidth="250" />
@@ -18,8 +26,7 @@ fx:controller="com.mycompany.pay.orders.controller.LoginController"
                 <Label fx:id="lblMessage" style="-fx-text-fill: red;" />
 
                 <Button fx:id="btnLogin" text="Iniciar Sesión" onAction="#handleLogin" prefWidth="250" />
-
-                <Button text="Registrar Nuevo Usuario" onAction="#abrirRegistro" prefWidth="250" />
+                <Button text="Registrar un nuevo usuario" onAction="#abrirRegistro" prefWidth="250" />
             </children>
         </VBox>
     </children>
