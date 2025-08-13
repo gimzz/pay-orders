@@ -47,7 +47,7 @@ public class DetallePedidoDAOImpl implements DetallePedidoDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     DetallePedido detalle = new DetallePedido();
-                    detalle.setId(rs.getInt("id"));  // Aquí seteamos el PK
+                    detalle.setId(rs.getInt("id"));  
                     detalle.setIdPedido(rs.getInt("id_pedido"));
                     detalle.setIdProducto(rs.getInt("id_producto"));
                     detalle.setCantidad(rs.getInt("cantidad"));
@@ -84,7 +84,7 @@ public class DetallePedidoDAOImpl implements DetallePedidoDAO {
 
             int filasActualizadas = ps.executeUpdate();
             if (filasActualizadas == 0) {
-                throw new SQLException("No se encontró ningún detalle con id " + detalle.getId() + " para actualizar.");
+                throw new SQLException("No se encontró ningún detalle con el identificador" + detalle.getId() + " para actualizar.");
             }
         }
     }
