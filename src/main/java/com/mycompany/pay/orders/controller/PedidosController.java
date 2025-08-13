@@ -1,6 +1,7 @@
 package com.mycompany.pay.orders.controller;
 
 import com.mycompany.pay.orders.dao.DetallePedidoDAOImpl;
+import com.mycompany.pay.orders.dao.PagosPedidoDAO;
 import com.mycompany.pay.orders.dao.PedidosDAOImpl;
 import com.mycompany.pay.orders.dao.ProductosDAO;
 import com.mycompany.pay.orders.model.DetallePedido;
@@ -18,11 +19,14 @@ public class PedidosController {
     private ProductosDAO productosDAO;
     private Connection connection;
 
-    public PedidosController(Connection connection, ProductosDAO productosDAO) {
+    private PagosPedidoDAO pagosPedidoDAO;
+
+    public PedidosController(Connection connection, ProductosDAO productosDAO, PagosPedidoDAO pagosPedidoDAO) {
         this.connection = connection;
         this.pedidosDAO = new PedidosDAOImpl(connection);
         this.detallesDAO = new DetallePedidoDAOImpl(connection);
         this.productosDAO = productosDAO;
+        this.pagosPedidoDAO = pagosPedidoDAO;
     }
 
     public void crearPedidoConDetalles(Pedidos pedido, List<DetallePedido> detalles) throws SQLException {
@@ -54,7 +58,24 @@ public class PedidosController {
     }
 
     public void actualizarEstadoEntrega(int pedidoId, boolean entregado) throws SQLException {
-        pedidosDAO.actualizarEstadoEntrega(entregado, pedidoId);
+        Pedidos pedido = pedidosDAO.obtenerPedidoPorId(pedidoId);
+        if (pedido == null) {
+            throw new IllegalArgumentException("Pedido no encontrado");
+        }
+
+        double totalPagado = pagosPedidoDAO.obtenerTotalPagadoPorPedido(pedidoId);
+        double totalPedido = pedido.getTotalUsd().doubleValue();
+
+        if (entregado && totalPagado < totalPedido) {
+            System.out.println("Advertencia: El pedido se marca como entregado, pero no está pagado completamente.");
+        } else if (!entregado && totalPagado >= totalPedido) {
+            System.out.println("Atención: El pedido está pagado pero aún no entregado.");
+        }
+
+        pedidosDAO.actualizarEstadoEntrega(pedidoId, entregado);
+
+        String nuevoEstadoPago = (totalPagado >= totalPedido) ? "PAGADO" : "PENDIENTE_DE_PAGO";
+        pedidosDAO.actualizarEstadoPago(pedidoId, nuevoEstadoPago);
     }
 
     public void eliminarPedidoCompleto(int pedidoId) throws SQLException {
@@ -96,4 +117,16 @@ public class PedidosController {
     public void eliminarDetalle(int idDetalle) throws SQLException {
         detallesDAO.eliminarDetalle(idDetalle);
     }
+
+    public boolean isPedidoCerrado(int pedidoId) throws SQLException {
+        Pedidos pedido = pedidosDAO.obtenerPedidoPorId(pedidoId);
+        if (pedido == null) {
+            throw new IllegalArgumentException("Pedido no encontrado");
+        }
+
+        String estadoPago = pedidosDAO.obtenerEstadoPago(pedidoId);
+
+        return pedido.isEntregado() && "PAGADO".equalsIgnoreCase(estadoPago);
+    }
+
 }

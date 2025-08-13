@@ -16,9 +16,13 @@ import java.util.List;
 public interface PedidosDAO {
     void crearPedido(Pedidos pedido) throws SQLException;
     Pedidos obtenerPedidoPorId(int id) throws SQLException;
-    void actualizarEstadoEntrega(boolean entregado, int id) throws SQLException;
+void actualizarEstadoEntrega(int pedidoId, boolean entregado) throws SQLException;
+void actualizarEstadoPago(int pedidoId, String estadoPago) throws SQLException;
     void eliminarPedido(int id) throws SQLException;
     List<Pedidos> obtenerTodosLosPedidos() throws SQLException;
     List<Pedidos> obtenerPedidosEntregados() throws SQLException;
     List<Pedidos> obtenerPedidosNoEntregados() throws SQLException;
+    String obtenerEstadoPago(int pedidoId) throws SQLException;
+
+
 }

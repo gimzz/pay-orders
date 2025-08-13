@@ -4,6 +4,7 @@ import com.mycompany.pay.orders.model.Pedidos;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import com.mycompany.pay.orders.dao.PedidosDAO;
 
 public class PedidosDAOImpl implements PedidosDAO {
 
@@ -46,7 +47,9 @@ public class PedidosDAOImpl implements PedidosDAO {
         try (PreparedStatement ps = this.connection.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) return null;
+                if (!rs.next()) {
+                    return null;
+                }
 
                 Timestamp timestamp = rs.getTimestamp("fecha");
                 java.time.LocalDateTime fechaPedido = timestamp != null ? timestamp.toLocalDateTime() : null;
@@ -62,21 +65,49 @@ public class PedidosDAOImpl implements PedidosDAO {
             }
         }
     }
-
     @Override
-    public void actualizarEstadoEntrega(boolean entregado, int id) throws SQLException {
-        String sql = "UPDATE system.pedidos SET entregado = ? WHERE id = ?";
-
-        try (PreparedStatement ps = this.connection.prepareStatement(sql)) {
-            ps.setBoolean(1, entregado);
-            ps.setInt(2, id);
-            int rows = ps.executeUpdate();
-
-            if (rows == 0) {
-                throw new SQLException("No se encontró ningún pedido con ID " + id + " para actualizar.");
+public void actualizarEstadoPago(int pedidoId, String estadoPago) throws SQLException {
+    String sql = "UPDATE system.pedidos SET estado_pago = ? WHERE id = ?";
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setString(1, estadoPago);
+        ps.setInt(2, pedidoId);
+        int rows = ps.executeUpdate();
+        if (rows == 0) {
+            throw new SQLException("No se encontró pedido con ID " + pedidoId);
+        }
+    }
+}
+@Override
+public String obtenerEstadoPago(int pedidoId) throws SQLException {
+    String sql = "SELECT estado_pago FROM system.pedidos WHERE id = ?";
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, pedidoId);
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getString("estado_pago");
+            } else {
+                throw new SQLException("Pedido no encontrado");
             }
         }
     }
+}
+    
+@Override
+public void actualizarEstadoEntrega(int pedidoId, boolean entregado) throws SQLException {
+    String sql = "UPDATE system.pedidos SET entregado = ? WHERE id = ?";
+
+    try (PreparedStatement ps = this.connection.prepareStatement(sql)) {
+        ps.setBoolean(1, entregado);
+        ps.setInt(2, pedidoId);
+        int rows = ps.executeUpdate();
+
+        if (rows == 0) {
+            throw new SQLException("No se encontró ningún pedido con ID " + pedidoId + " para actualizar.");
+        }
+    }
+}
+
+
 
     @Override
     public void eliminarPedido(int id) throws SQLException {
@@ -96,8 +127,7 @@ public class PedidosDAOImpl implements PedidosDAO {
         String sql = "SELECT * FROM system.pedidos";
         List<Pedidos> pedidos = new ArrayList<>();
 
-        try (PreparedStatement ps = this.connection.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = this.connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 Pedidos pedido = mapearPedido(rs);
                 pedidos.add(pedido);
