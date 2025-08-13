@@ -12,4 +12,5 @@ public interface DetallePedidoDAO {
 
     void eliminarDetalle(int idDetalle) throws SQLException;
 
+    public DetallePedido obtenerDetallePorId(int idDetalle) throws SQLException;
 }

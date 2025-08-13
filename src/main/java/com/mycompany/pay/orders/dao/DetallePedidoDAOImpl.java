@@ -73,6 +73,26 @@ public class DetallePedidoDAOImpl implements DetallePedidoDAO {
             }
         }
     }
+    public DetallePedido obtenerDetallePorId(int idDetalle) throws SQLException {
+    String sql = "SELECT * FROM system.detalle_pedido WHERE id = ?";
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, idDetalle);
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                DetallePedido detalle = new DetallePedido();
+                detalle.setId(rs.getInt("id"));
+                detalle.setIdPedido(rs.getInt("id_pedido"));
+                detalle.setIdProducto(rs.getInt("id_producto"));
+                detalle.setCantidad(rs.getInt("cantidad"));
+                detalle.setPrecioUnitario(rs.getBigDecimal("precio_unitario_usd"));
+                detalle.setSubtotalUsd(rs.getBigDecimal("subtotal_usd"));
+                return detalle;
+            }
+            return null;
+        }
+    }
+}
+
 
     public void actualizarDetalle(DetallePedido detalle) throws SQLException {
         String sql = "UPDATE system.detalle_pedido SET cantidad = ?, precio_unitario_usd = ? WHERE id = ?";
