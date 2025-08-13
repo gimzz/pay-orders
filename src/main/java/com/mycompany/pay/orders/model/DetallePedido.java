@@ -11,16 +11,18 @@ import java.math.BigDecimal;
  * @author gimz
  */
 public class DetallePedido {
-
+    
+    private int id;
     private int idPedido;
     private int idProducto;
     private int cantidad;
     private BigDecimal precioUnitario;
     private BigDecimal subtotalUsd;
 
-    public DetallePedido(){}
-    
-    public DetallePedido(int idPedido, int idProducto, int cantidad, BigDecimal precioUnitario, BigDecimal subtotalUsd) {
+    public DetallePedido() {
+    }
+
+    public DetallePedido(int id, int idPedido, int idProducto, int cantidad, BigDecimal precioUnitario, BigDecimal subtotalUsd) {
         this.idPedido = idPedido;
         this.idProducto = idProducto;
         this.cantidad = cantidad;
@@ -67,5 +69,14 @@ public class DetallePedido {
     public void setSubtotalUsd(BigDecimal subtotalUsd) {
         this.subtotalUsd = subtotalUsd;
     }
+       public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+  
 
 }
