@@ -35,6 +35,11 @@ public class Clientes {
         return id;
     }
 
+    @Override
+    public String toString() {
+        return nombre + " " + apellido;
+    }
+
     public void setId(int id) {
         this.id = id;
     }
