@@ -1,11 +1,12 @@
-package com.mycompany.pay.orders.controller;
 
-import com.mycompany.pay.orders.dao.ProductosDAO;
-import com.mycompany.pay.orders.model.Productos;
+package com.mycompany.pay.orders.controller;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
+
+import com.mycompany.pay.orders.dao.ProductosDAO;
+import com.mycompany.pay.orders.model.Productos;
 
 public class ProductosController {
 

@@ -1,3 +1,4 @@
+
 package com.mycompany.pay.orders.controller;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -32,7 +33,9 @@ public class RegistroController {
         try {
             Connection connection = obtenerConexionDB();
             UsuarioDAO usuarioDAO = new UsuarioDAOImpl(connection);
-            this.usuarioController = new UsuarioController(usuarioDAO);
+            this.usuarioController = new UsuarioController(); // constructor sin parametros
+this.usuarioController.setUsuarioDAO(usuarioDAO); // inyectas el DAO
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
