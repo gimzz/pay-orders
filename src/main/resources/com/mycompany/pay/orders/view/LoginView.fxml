@@ -3,9 +3,8 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-
-<AnchorPane xmlns="http://javafx.com/javafx/8.0.171" 
-            xmlns:fx="http://javafx.com/fxml/1" 
+<AnchorPane xmlns="http://javafx.com/javafx/8.0.171"
+            xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.mycompany.pay.orders.controller.LoginController"
             prefWidth="800" prefHeight="600"
             stylesheets="@estilos/login.css"
@@ -16,19 +15,14 @@
               AnchorPane.topAnchor="100" AnchorPane.leftAnchor="250" AnchorPane.rightAnchor="250"
               styleClass="v-box">
             <children>
-<ImageView fx:id="imageView" fitHeight="150" fitWidth="150" pickOnBounds="true" preserveRatio="true"/>
-
+                <ImageView fx:id="imageView" fitHeight="150" fitWidth="150" pickOnBounds="true" preserveRatio="true"/>
                 <Label text="Iniciar Sesión" styleClass="label"/>
-
                 <TextField fx:id="txtUsername" promptText="Usuario" prefWidth="250" />
                 <PasswordField fx:id="txtPassword" promptText="Contraseña" prefWidth="250" />
-
                 <Label fx:id="lblMessage" style="-fx-text-fill: red;" />
-
                 <Button fx:id="btnLogin" text="Iniciar Sesión" onAction="#handleLogin" prefWidth="250" />
                 <Button text="Registrar un nuevo usuario" onAction="#abrirRegistro" prefWidth="250" />
             </children>
         </VBox>
     </children>
-
 </AnchorPane>

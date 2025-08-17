@@ -1,0 +1,27 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx" 
+      xmlns:fx="http://javafx.com/fxml" 
+      fx:controller="com.mycompany.pay.orders.controller.ProductosClienteController"
+      spacing="10">
+    <padding>
+        <Insets top="10" right="10" bottom="10" left="10"/>
+    </padding>
+
+    <Label fx:id="lblTitulo" text="Productos del Cliente" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+
+    <TableView fx:id="tablaProductos" prefHeight="300" prefWidth="500">
+        <columns>
+            <TableColumn fx:id="colProductoNombre" text="Producto" prefWidth="250"/>
+            <TableColumn fx:id="colPrecioUnitario" text="Precio Unitario (USD)" prefWidth="150"/>
+            <TableColumn fx:id="colCantidad" text="Cantidad" prefWidth="100"/>
+        </columns>
+    </TableView>
+
+    <Button text="Cerrar" onAction="#cerrarVentana"/>
+</VBox>
