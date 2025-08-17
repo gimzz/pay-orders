@@ -4,10 +4,11 @@
  */
 package com.mycompany.pay.orders.controller;
 
-import com.mycompany.pay.orders.dao.ClientesDAO;
-import com.mycompany.pay.orders.model.Clientes;
 import java.sql.SQLException;
 import java.util.List;
+
+import com.mycompany.pay.orders.dao.ClientesDAO;
+import com.mycompany.pay.orders.model.Clientes;
 
 /**
  *
@@ -17,8 +18,14 @@ public class ClientesController {
 
     private ClientesDAO clientesDAO;
 
+    private ClientesController clientesController;
     public ClientesController(ClientesDAO clientesDAO) {
         this.clientesDAO = clientesDAO;
+    }
+    
+
+    public void setClientesController(ClientesController clientesController) {
+        this.clientesController = clientesController;
     }
 
     public void agregarCliente(Clientes clientes) throws SQLException, IllegalArgumentException {
