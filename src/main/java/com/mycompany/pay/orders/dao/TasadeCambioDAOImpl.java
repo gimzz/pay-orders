@@ -1,21 +1,20 @@
 package com.mycompany.pay.orders.dao;
 
 import com.mycompany.pay.orders.model.TasadeCambio;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.math.BigDecimal;
 
 public class TasadeCambioDAOImpl implements TasadeCambioDAO {
 
-    private Connection connection;
+    private final Connection connection;
 
     public TasadeCambioDAOImpl(Connection connection) {
         this.connection = connection;
@@ -47,8 +46,7 @@ public class TasadeCambioDAOImpl implements TasadeCambioDAO {
     public TasadeCambio obtenerTasaCambioPorFecha(LocalDate fecha) throws SQLException {
         String sql = "SELECT * FROM system.tasa_cambio WHERE CAST(fecha AS DATE) = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setObject(1, fecha); 
-
+            ps.setObject(1, fecha); // LocalDate es compatible con drivers JDBC modernos
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return extraerTasadeCambioDeResultSet(rs);
@@ -76,10 +74,8 @@ public class TasadeCambioDAOImpl implements TasadeCambioDAO {
     public List<TasadeCambio> obtenerTodasLasTasasCambio() throws SQLException {
         String sql = "SELECT * FROM system.tasa_cambio ORDER BY fecha DESC";
         List<TasadeCambio> lista = new ArrayList<>();
-
         try (PreparedStatement ps = connection.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
-
             while (rs.next()) {
                 TasadeCambio tasa = extraerTasadeCambioDeResultSet(rs);
                 lista.add(tasa);
@@ -95,7 +91,6 @@ public class TasadeCambioDAOImpl implements TasadeCambioDAO {
         String monedaOrigen = rs.getString("moneda_origen");
         String monedaDestino = rs.getString("moneda_destino");
         BigDecimal valor = rs.getBigDecimal("valor");
-
         return new TasadeCambio(id, fechaTasaCambio, monedaOrigen, monedaDestino, valor);
     }
 }
