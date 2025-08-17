@@ -25,4 +25,6 @@ void actualizarEstadoPago(int pedidoId, String estadoPago) throws SQLException;
     List<Pedidos> obtenerPedidosNoEntregados() throws SQLException;
     String obtenerEstadoPago(int pedidoId) throws SQLException;
 public void actualizarTotalPedido(int pedidoId, BigDecimal total) throws SQLException;
+    public String obtenerMetodoPago(int pedidoId) throws SQLException;
+
 }
