@@ -85,7 +85,7 @@ public class DetallePedidoDAOImpl implements DetallePedidoDAO {
                 detalle.setIdProducto(rs.getInt("id_producto"));
                 detalle.setCantidad(rs.getInt("cantidad"));
                 detalle.setPrecioUnitario(rs.getBigDecimal("precio_unitario_usd"));
-                detalle.setSubtotalUsd(rs.getBigDecimal("subtotal_usd"));
+detalle.setSubtotalUsd(rs.getBigDecimal("subtotal_usd"));
                 return detalle;
             }
             return null;
