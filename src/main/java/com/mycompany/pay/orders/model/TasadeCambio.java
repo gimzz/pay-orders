@@ -12,14 +12,16 @@ import java.time.LocalDateTime;
  * @author gimz
  */
 public class TasadeCambio {
+
     private int id;
     private LocalDateTime fechaTasaCambio;
     private String monedaOrigen;
     private String monedaDestino;
     private BigDecimal valor;
 
-    public TasadeCambio(){}
-    
+    public TasadeCambio() {
+    }
+
     public TasadeCambio(int id, LocalDateTime fechaTasaCambio, String monedaOrigen, String monedaDestino, BigDecimal valor) {
         this.id = id;
         this.fechaTasaCambio = fechaTasaCambio;
@@ -48,6 +50,11 @@ public class TasadeCambio {
         return monedaOrigen;
     }
 
+    @Override
+    public String toString() {
+        return monedaOrigen + " -> " + monedaDestino + " : " + valor;
+    }
+
     public void setMonedaOrigen(String monedaOrigen) {
         this.monedaOrigen = monedaOrigen;
     }
@@ -67,6 +74,5 @@ public class TasadeCambio {
     public void setValor(BigDecimal valor) {
         this.valor = valor;
     }
-    
-    
+
 }
