@@ -3,17 +3,18 @@ package com.mycompany.pay.orders.model;
 import java.math.BigDecimal;
 
 public class Productos {
+
     private int id;
     private String nombre;
     private BigDecimal precioUsd;
     private int stockActual;
     private int stockMinimo;
     private boolean activo;
-    private Integer idCategoria;  
+    private Integer idCategoria;
 
     public Productos(int id, String nombre, BigDecimal precioUsd, int stockActual, int stockMinimo, boolean activo) {
-    this(id, nombre, precioUsd, stockActual, stockMinimo, activo, null);
-}
+        this(id, nombre, precioUsd, stockActual, stockMinimo, activo, null);
+    }
 
     public Productos(int id, String nombre, BigDecimal precioUsd, int stockActual, int stockMinimo, boolean activo, Integer idCategoria) {
         this.id = id;
@@ -24,9 +25,7 @@ public class Productos {
         this.activo = activo;
         this.idCategoria = idCategoria;
     }
-    
-    
-    
+
     public Productos() {
     }
 
@@ -58,6 +57,11 @@ public class Productos {
         return stockActual;
     }
 
+    @Override
+    public String toString() {
+        return nombre;
+    }
+
     public void setStockActual(int stockActual) {
         this.stockActual = stockActual;
     }
@@ -77,7 +81,8 @@ public class Productos {
     public void setActivo(boolean activo) {
         this.activo = activo;
     }
-        public Integer getIdCategoria() {
+
+    public Integer getIdCategoria() {
         return idCategoria;
     }
 
