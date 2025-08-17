@@ -1,14 +1,14 @@
 package com.mycompany.pay.orders.controller;
 
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import com.mycompany.pay.orders.dao.MovimientoInventarioDAO;
 import com.mycompany.pay.orders.dao.ProductosDAO;
 import com.mycompany.pay.orders.model.MovimientoInventario;
 import com.mycompany.pay.orders.model.Productos;
 import com.mycompany.pay.orders.model.TipoMovimiento;
-
-import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.util.List;
 
 public class InventarioController {
 
