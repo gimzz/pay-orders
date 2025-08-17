@@ -1,18 +1,56 @@
+
 package com.mycompany.pay.orders.controller;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.List;
 
 import com.mycompany.pay.orders.dao.UsuarioDAO;
 import com.mycompany.pay.orders.model.Usuario;
 
-import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.util.List;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 public class UsuarioController {
 
     private UsuarioDAO usuarioDAO;
 
-    public UsuarioController(UsuarioDAO usuarioDAO) {
+    private ObservableList<Usuario> listaUsuarios;
+
+    @FXML
+    private TableView<Usuario> tablaUsuarios;
+
+    @FXML
+    private TableColumn<Usuario, String> colUsuario;
+
+    @FXML
+    private TableColumn<Usuario, String> colRol;
+
+    @FXML
+    private TableColumn<Usuario, String> colEstado;
+
+    @FXML
+    private Label lblMensaje;
+
+    // Constructor vacío para que JavaFX pueda instanciar el controlador
+    public UsuarioController() {
+    }
+
+    // Método para inyectar DAO después de cargar la FXML y tener todo inicializado
+    public void setUsuarioDAO(UsuarioDAO usuarioDAO) {
         this.usuarioDAO = usuarioDAO;
+        cargarUsuarios(); // carga los usuarios cuando el DAO ya está listo
     }
 
     public void agregarUsuario(Usuario usuario) throws SQLException, IllegalArgumentException {
@@ -43,14 +81,6 @@ public class UsuarioController {
         usuarioDAO.eliminarUsuario(id);
     }
 
-    /**
-     * Método privado para validar un objeto Usuario antes de persistirlo o
-     * actualizarlo.
-     *
-     * @param usuario Usuario a validar
-     * @param esNuevo Indica si es nuevo usuario (true para agregar, false para
-     * actualizar)
-     */
     private void validarUsuario(Usuario usuario, boolean esNuevo) {
         if (usuario == null) {
             throw new IllegalArgumentException("El usuario no puede ser null");
@@ -67,6 +97,119 @@ public class UsuarioController {
         if (esNuevo && usuario.getFechaCreacion() == null) {
             usuario.setFechaCreacion(LocalDateTime.now());
         }
+    }
 
+    @FXML
+    private void initialize() {
+        colUsuario.setCellValueFactory(cellData -> cellData.getValue().nombreUsuarioProperty());
+        colRol.setCellValueFactory(cellData -> cellData.getValue().rolPropertyString());
+        colEstado.setCellValueFactory(cellData -> cellData.getValue().estadoProperty());
+        listaUsuarios = FXCollections.observableArrayList();
+        tablaUsuarios.setItems(listaUsuarios);
+
+        if (usuarioDAO != null) {
+            cargarUsuarios();
+        }
+    }
+
+    private void cargarUsuarios() {
+        if (usuarioDAO == null) {
+            lblMensaje.setText("Error: DAO no inicializado.");
+            return;
+        }
+        try {
+            List<Usuario> usuarios = usuarioDAO.obtenerTodosLosUsuarios();
+            listaUsuarios.setAll(usuarios);
+            lblMensaje.setText("");
+        } catch (SQLException e) {
+            lblMensaje.setText("Error al cargar usuarios: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+@FXML
+public void abrirFormularioAgregar(ActionEvent event) {
+    try {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/UsuarioForm.fxml"));
+        Parent root = loader.load();
+
+        UsuarioFormController formController = loader.getController();
+        formController.setUsuarioDAO(usuarioDAO);
+
+        Stage stage = new Stage();
+        stage.setScene(new Scene(root));
+        stage.setTitle("Agregar Nuevo Usuario");
+        stage.initModality(Modality.APPLICATION_MODAL);
+
+        stage.setWidth(450);
+        stage.setHeight(350);
+
+        stage.setMinWidth(400);
+        stage.setMinHeight(300);
+
+        stage.showAndWait();
+
+        if (formController.isGuardado()) {
+            cargarUsuarios();
+            lblMensaje.setText("Usuario agregado correctamente.");
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+        lblMensaje.setText("Error al abrir formulario de agregar usuario.");
+    }
+}
+
+@FXML
+public void abrirFormularioEditar(ActionEvent event) {
+    Usuario seleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
+    if (seleccionado == null) {
+        lblMensaje.setText("Seleccione un usuario para editar.");
+        return;
+    }
+    try {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/UsuarioForm.fxml"));
+        Parent root = loader.load();
+
+        UsuarioFormController formController = loader.getController();
+        formController.setUsuarioDAO(usuarioDAO);
+        formController.cargarUsuario(seleccionado);
+
+        Stage stage = new Stage();
+        stage.setScene(new Scene(root));
+        stage.setTitle("Editar Usuario");
+        stage.initModality(Modality.APPLICATION_MODAL);
+
+        stage.setWidth(450);
+        stage.setHeight(350);
+        stage.setMinWidth(400);
+        stage.setMinHeight(300);
+
+        stage.showAndWait();
+
+        if (formController.isGuardado()) {
+            cargarUsuarios();
+            lblMensaje.setText("Usuario actualizado correctamente.");
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+        lblMensaje.setText("Error al abrir formulario de edición de usuario.");
+    }
+}
+
+
+    @FXML
+    public void eliminarUsuario(ActionEvent event) {
+        Usuario seleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
+        if (seleccionado == null) {
+            lblMensaje.setText("Seleccione un usuario para eliminar.");
+            return;
+        }
+        try {
+            usuarioDAO.eliminarUsuario(seleccionado.getId());
+            lblMensaje.setText("Usuario eliminado: " + seleccionado.getNombreUsuario());
+            cargarUsuarios();
+        } catch (SQLException e) {
+            lblMensaje.setText("Error al eliminar usuario: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
