@@ -1,10 +1,10 @@
 package com.mycompany.pay.orders.controller;
 
-import com.mycompany.pay.orders.dao.MetodosdePagoDAO;
-import com.mycompany.pay.orders.model.MetodosdePago;
-
 import java.sql.SQLException;
 import java.util.List;
+
+import com.mycompany.pay.orders.dao.MetodosdePagoDAO;
+import com.mycompany.pay.orders.model.MetodosdePago;
 
 public class MetodosdePagoController {
 
