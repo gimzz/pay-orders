@@ -1,6 +1,7 @@
 package com.mycompany.pay.orders.dao;
 
 import com.mycompany.pay.orders.model.Pedidos;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,6 @@ public class PedidosDAOImpl implements PedidosDAO {
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, pedido.getClienteId());
             ps.setTimestamp(2, pedido.getFechaPedido() != null ? Timestamp.valueOf(pedido.getFechaPedido()) : null);
-            // El total inicialmente puede ser cero o null, se actualizará luego
             ps.setBigDecimal(3, pedido.getTotalUsd() != null ? pedido.getTotalUsd() : BigDecimal.ZERO);
             ps.setBigDecimal(4, pedido.getTasaCambioAplicada());
             ps.setBoolean(5, pedido.isEntregado());
@@ -49,12 +49,12 @@ public class PedidosDAOImpl implements PedidosDAO {
                 Timestamp timestamp = rs.getTimestamp("fecha");
                 java.time.LocalDateTime fechaPedido = timestamp != null ? timestamp.toLocalDateTime() : null;
                 return new Pedidos(
-                    rs.getInt("id"),
-                    rs.getInt("cliente_id"),
-                    fechaPedido,
-                    rs.getBigDecimal("total_usd"),
-                    rs.getBigDecimal("tasa_cambio_aplicada"),
-                    rs.getBoolean("entregado")
+                        rs.getInt("id"),
+                        rs.getInt("cliente_id"),
+                        fechaPedido,
+                        rs.getBigDecimal("total_usd"),
+                        rs.getBigDecimal("tasa_cambio_aplicada"),
+                        rs.getBoolean("entregado")
                 );
             }
         }
@@ -103,6 +103,22 @@ public class PedidosDAOImpl implements PedidosDAO {
         }
     }
 
+    public void actualizarPedido(Pedidos pedido) throws SQLException {
+        String sql = "UPDATE system.pedidos SET cliente_id = ?, fecha = ?, total_usd = ?, tasa_cambio_aplicada = ?, entregado = ? WHERE id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, pedido.getClienteId());
+            ps.setTimestamp(2, pedido.getFechaPedido() != null ? Timestamp.valueOf(pedido.getFechaPedido()) : null);
+            ps.setBigDecimal(3, pedido.getTotalUsd() != null ? pedido.getTotalUsd() : BigDecimal.ZERO);
+            ps.setBigDecimal(4, pedido.getTasaCambioAplicada());
+            ps.setBoolean(5, pedido.isEntregado());
+            ps.setInt(6, pedido.getId());
+            int rows = ps.executeUpdate();
+            if (rows == 0) {
+                throw new SQLException("No se encontró pedido con ID " + pedido.getId() + " para actualizar.");
+            }
+        }
+    }
+
     public void actualizarTotalPedido(int pedidoId, BigDecimal total) throws SQLException {
         String sql = "UPDATE system.pedidos SET total_usd = ? WHERE id = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -114,7 +130,7 @@ public class PedidosDAOImpl implements PedidosDAO {
             }
         }
     }
-    
+
     @Override
     public void actualizarEstadoEntrega(int pedidoId, boolean entregado) throws SQLException {
         String sql = "UPDATE system.pedidos SET entregado = ? WHERE id = ?";
