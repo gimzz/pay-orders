@@ -37,14 +37,12 @@ public class PedidosController {
         try {
             connection.setAutoCommit(false);
 
-            if (pedido.getTasaCambioAplicada() == null || pedido.getTasaCambioAplicada().compareTo(BigDecimal.ZERO) <= 0) {
-                TasadeCambio ultimaTasa = tasaCambioController.obtenerUltimaTasaCambio();
-                BigDecimal tasa = ultimaTasa != null ? ultimaTasa.getValor() : BigDecimal.ONE;
-                pedido.setTasaCambioAplicada(tasa);
+            if (pedido.getId() == 0) {
+                pedidosDAO.crearPedido(pedido);
+            } else {
+                pedidosDAO.actualizarPedido(pedido);
+                detallesDAO.eliminarDetallesPorPedido(pedido.getId());
             }
-            pedido.setTotalUsd(BigDecimal.ZERO);
-
-            pedidosDAO.crearPedido(pedido);
 
             for (DetallePedido detalle : detalles) {
                 detalle.setIdPedido(pedido.getId());
@@ -61,17 +59,16 @@ public class PedidosController {
             connection.setAutoCommit(true);
         }
     }
-    
-    public List<DetallePedido> obtenerDetallesPorCliente(int clienteId) throws SQLException {
-    List<Pedidos> pedidosCliente = pedidosDAO.obtenerPedidosPorCliente(clienteId);
-    List<DetallePedido> detallesTotales = new ArrayList<>();
-    for (Pedidos pedido : pedidosCliente) {
-        List<DetallePedido> detallesPedido = detallesDAO.obtenerDetallesPorPedido(pedido.getId());
-        detallesTotales.addAll(detallesPedido);
-    }
-    return detallesTotales;
-}
 
+    public List<DetallePedido> obtenerDetallesPorCliente(int clienteId) throws SQLException {
+        List<Pedidos> pedidosCliente = pedidosDAO.obtenerPedidosPorCliente(clienteId);
+        List<DetallePedido> detallesTotales = new ArrayList<>();
+        for (Pedidos pedido : pedidosCliente) {
+            List<DetallePedido> detallesPedido = detallesDAO.obtenerDetallesPorPedido(pedido.getId());
+            detallesTotales.addAll(detallesPedido);
+        }
+        return detallesTotales;
+    }
 
     public Pedidos obtenerPedido(int id) throws SQLException {
         return pedidosDAO.obtenerPedidoPorId(id);
@@ -81,24 +78,23 @@ public class PedidosController {
         return detallesDAO.obtenerDetallesPorPedido(idPedido);
     }
 
-   private void actualizarTotalPedido(int pedidoId) throws SQLException {
-    List<DetallePedido> detalles = detallesDAO.obtenerDetallesPorPedido(pedidoId);
-    BigDecimal total = BigDecimal.ZERO;
+    private void actualizarTotalPedido(int pedidoId) throws SQLException {
+        List<DetallePedido> detalles = detallesDAO.obtenerDetallesPorPedido(pedidoId);
+        BigDecimal total = BigDecimal.ZERO;
 
-    for (DetallePedido detalle : detalles) {
-        if (detalle.getSubtotalUsd() != null) {
-            total = total.add(detalle.getSubtotalUsd());
-        } else {
-            BigDecimal subtotal = detalle.getPrecioUnitario().multiply(BigDecimal.valueOf(detalle.getCantidad()));
-            total = total.add(subtotal);
+        for (DetallePedido detalle : detalles) {
+            if (detalle.getSubtotalUsd() != null) {
+                total = total.add(detalle.getSubtotalUsd());
+            } else {
+                BigDecimal subtotal = detalle.getPrecioUnitario().multiply(BigDecimal.valueOf(detalle.getCantidad()));
+                total = total.add(subtotal);
+            }
         }
+
+        total = total.setScale(2, java.math.RoundingMode.HALF_UP);
+
+        pedidosDAO.actualizarTotalPedido(pedidoId, total);
     }
-
-    total = total.setScale(2, java.math.RoundingMode.HALF_UP);
-
-    pedidosDAO.actualizarTotalPedido(pedidoId, total);
-}
-
 
     public void validarModificacionPedido(int pedidoId) throws SQLException {
         Pedidos pedido = pedidosDAO.obtenerPedidoPorId(pedidoId);
@@ -136,15 +132,31 @@ public class PedidosController {
 
     public void actualizarEstadoEntrega(int pedidoId, boolean entregado) throws SQLException {
         pedidosDAO.actualizarEstadoEntrega(pedidoId, entregado);
+
         double totalPagado = pagosPedidoDAO.obtenerTotalPagadoPorPedido(pedidoId);
         Pedidos pedido = pedidosDAO.obtenerPedidoPorId(pedidoId);
+
         if (pedido == null) {
             throw new IllegalArgumentException("Pedido no encontrado");
         }
+
         double totalPedido = pedido.getTotalUsd().doubleValue();
         String nuevoEstadoPago = (totalPagado >= totalPedido) ? "PAGADO" : "PENDIENTE";
+
         pedidosDAO.actualizarEstadoPago(pedidoId, nuevoEstadoPago);
     }
+    public ProductosDAO getProductosDAO() {
+    return productosDAO;
+}
+
+public PagosPedidoDAO getPagosPedidoDAO() {
+    return pagosPedidoDAO;
+}
+
+public TasadeCambioController getTasaCambioController() {
+    return tasaCambioController;
+}
+
 
     public void eliminarPedidoCompleto(int pedidoId) throws SQLException {
         try {
@@ -168,4 +180,3 @@ public class PedidosController {
         return pedidosDAO;
     }
 }
-

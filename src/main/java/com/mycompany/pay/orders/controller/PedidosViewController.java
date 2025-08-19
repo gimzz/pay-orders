@@ -1,4 +1,3 @@
-
 package com.mycompany.pay.orders.controller;
 
 import java.math.BigDecimal;
@@ -32,7 +31,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class PedidosViewController {
-
     @FXML
     private TableView<Pedidos> tablaPedidos;
     @FXML
@@ -50,7 +48,7 @@ public class PedidosViewController {
     @FXML
     private TableColumn<Pedidos, String> colEstadoPago;
     @FXML
-    private TableColumn<Pedidos, String> colMetodoPago;  // Método de pago
+    private TableColumn<Pedidos, String> colMetodoPago;
     @FXML
     private Label lblMensaje;
 
@@ -62,14 +60,11 @@ public class PedidosViewController {
     public void setControllers(Connection connection, ClientesController clientesController) {
         this.connection = connection;
         this.clientesController = clientesController;
-
         ProductosDAO productosDAO = new ProductosDAOImpl(connection);
         PagosPedidoDAO pagosPedidoDAO = new PagosPedidoImpl(connection);
         TasadeCambioDAO tasaCambioDAO = new TasadeCambioDAOImpl(connection);
         TasadeCambioController tasaCambioController = new TasadeCambioController(tasaCambioDAO);
-
         this.pedidosController = new PedidosController(connection, productosDAO, pagosPedidoDAO, tasaCambioController);
-
         cargarPedidos();
     }
 
@@ -157,7 +152,35 @@ public class PedidosViewController {
 
     @FXML
     private void abrirFormularioNuevoPedido() {
-        lblMensaje.setText("Funcionalidad Nuevo Pedido aún no implementada.");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/PedidoFormView.fxml"));
+            Parent root = loader.load();
+
+            PedidoFormController controller = loader.getController();
+
+            controller.setControllers(
+                pedidosController,
+                new ProductosController(pedidosController.getProductosDAO()),
+                pedidosController.getTasaCambioController(),
+                clientesController,
+                null, // Métodos de pago no definido, pasar null si no tienes controlador
+                new PagosPedidoController(pedidosController.getPagosPedidoDAO())
+            );
+
+            controller.cargarDatosDespuesDeSetController(null);
+
+            Stage stage = new Stage();
+            stage.setTitle("Nuevo Pedido");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+
+            cargarPedidos();
+
+        } catch (Exception e) {
+            lblMensaje.setText("Error al abrir formulario nuevo pedido: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -167,7 +190,35 @@ public class PedidosViewController {
             lblMensaje.setText("Seleccione un pedido para editar.");
             return;
         }
-        lblMensaje.setText("Funcionalidad Editar Pedido aún no implementada.");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/PedidoFormView.fxml"));
+            Parent root = loader.load();
+
+            PedidoFormController controller = loader.getController();
+
+            controller.setControllers(
+                pedidosController,
+                new ProductosController(pedidosController.getProductosDAO()),
+                pedidosController.getTasaCambioController(),
+                clientesController,
+                null, // Métodos de pago no definido, pasar null
+                new PagosPedidoController(pedidosController.getPagosPedidoDAO())
+            );
+
+            controller.cargarDatosDespuesDeSetController(seleccionado);
+
+            Stage stage = new Stage();
+            stage.setTitle("Editar Pedido");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+
+            cargarPedidos();
+
+        } catch (Exception e) {
+            lblMensaje.setText("Error al abrir formulario edición: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -197,11 +248,13 @@ public class PedidosViewController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/ProductosClienteView.fxml"));
             Parent root = loader.load();
+
             ProductosClienteController controller = loader.getController();
             controller.setPedidosController(pedidosController);
             ProductosController productosController = new ProductosController(new ProductosDAOImpl(connection));
             controller.setProductosController(productosController);
             controller.setClienteId(seleccionado.getClienteId());
+
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
             stage.setTitle("Productos del Cliente: " + seleccionado.getClienteId());
@@ -211,6 +264,7 @@ public class PedidosViewController {
             stage.setMinHeight(400);
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
+
         } catch (Exception e) {
             lblMensaje.setText("Error al abrir ventana de productos: " + e.getMessage());
             e.printStackTrace();

@@ -3,9 +3,9 @@ package com.mycompany.pay.orders.controller;
 import com.mycompany.pay.orders.model.Productos;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-
 import java.util.List;
 
 public class SeleccionProductoFormController {
@@ -17,7 +17,6 @@ public class SeleccionProductoFormController {
 
     private Productos productoSeleccionado;
     private int cantidadSeleccionada;
-
     private boolean agregado = false;
 
     public void setProductos(List<Productos> productos) {
@@ -29,11 +28,11 @@ public class SeleccionProductoFormController {
 
     @FXML
     private void initialize() {
-        btnAgregar.setOnAction(e -> onAgregar());
-        btnCancelar.setOnAction(e -> onCancelar());
+        spinnerCantidad.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 1));
     }
 
-    private void onAgregar() {
+    @FXML
+    private void onAgregarProducto(ActionEvent event) {
         Productos p = comboProducto.getSelectionModel().getSelectedItem();
         Integer cantidad = spinnerCantidad.getValue();
         if (p == null) {
@@ -50,7 +49,8 @@ public class SeleccionProductoFormController {
         cerrarVentana();
     }
 
-    private void onCancelar() {
+    @FXML
+    private void onCancelar(ActionEvent event) {
         agregado = false;
         cerrarVentana();
     }
