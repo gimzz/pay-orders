@@ -7,20 +7,21 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import javafx.util.converter.BigDecimalStringConverter;
 import javafx.util.converter.IntegerStringConverter;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 public class PedidoFormController {
     @FXML private ComboBox<Clientes> comboCliente;
@@ -50,6 +51,15 @@ public class PedidoFormController {
     private ObservableList<DetallePedidoRow> detalles = FXCollections.observableArrayList();
     private Pedidos pedidoEnEdicion = null; // null si es nuevo pedido
 
+    // Referencia al controlador principal para recargar tabla pedidos
+    private PedidosViewController pedidosViewController;
+
+    // Setter para la referencia del controlador principal
+    public void setPedidosViewController(PedidosViewController controller) {
+        this.pedidosViewController = controller;
+    }
+
+    // Configuración de controladores usados en este formulario
     public void setControllers(
         PedidosController pedidosCtl,
         ProductosController productosCtl,
@@ -68,7 +78,6 @@ public class PedidoFormController {
 
     @FXML
     public void initialize() {
-        // Configurar columnas
         colProducto.setCellValueFactory(cellData -> cellData.getValue().productoProperty());
         colProducto.setCellFactory(ComboBoxTableCell.forTableColumn(FXCollections.observableArrayList()));
         colCantidad.setCellValueFactory(cellData -> cellData.getValue().cantidadProperty().asObject());
@@ -78,7 +87,6 @@ public class PedidoFormController {
         colPrecioUsd.setCellValueFactory(cellData -> cellData.getValue().precioProperty());
         colPrecioUsd.setCellFactory(TextFieldTableCell.forTableColumn(new BigDecimalStringConverter()));
         colSubtotal.setCellValueFactory(cellData -> cellData.getValue().subtotalProperty());
-
         colQuitar.setCellFactory(col -> {
             TableCell<DetallePedidoRow, Void> cell = new TableCell<>() {
                 private final Button btn = new Button("Quitar");
@@ -96,12 +104,9 @@ public class PedidoFormController {
             };
             return cell;
         });
-
         tablaProductos.setItems(detalles);
         tablaProductos.setEditable(true);
-
         btnAgregarProducto.setOnAction(e -> abrirSelectorProducto());
-
         detalles.addListener((javafx.collections.ListChangeListener.Change<? extends DetallePedidoRow> change) -> actualizarTotales());
         comboTasaCambio.setOnAction(e -> {
             actualizarTotales();
@@ -109,64 +114,24 @@ public class PedidoFormController {
         });
         chkPagado.setOnAction(e -> actualizarEstado());
         chkEntregado.setOnAction(e -> actualizarEstado());
-
         actualizarEstado();
-
         btnGuardar.setOnAction(this::guardarPedido);
         btnCancelar.setOnAction(e -> cerrar());
     }
 
-    /** Debe llamarse luego de setControllers para cargar datos */
-    public void cargarDatosDespuesDeSetController(Pedidos pedidoEditar) {
+    public void cargarDatosIniciales() {
         try {
             List<Clientes> clientes = clientesController.obtenerTodosLosClientes();
             comboCliente.setItems(FXCollections.observableArrayList(clientes));
             List<TasadeCambio> tasas = tasaCambioController.obtenerTodasLasTasasCambio();
             comboTasaCambio.setItems(FXCollections.observableArrayList(tasas));
-            if (!tasas.isEmpty()) {
-                comboTasaCambio.getSelectionModel().select(0);
-            }
-            actualizarTasaCambioComboVisual();
-            
+            if (!tasas.isEmpty()) comboTasaCambio.getSelectionModel().select(0);
             List<Productos> productos = productosController.obtenerTodosLosProductos();
             colProducto.setCellFactory(ComboBoxTableCell.forTableColumn(FXCollections.observableArrayList(productos)));
-
             if (metodosPagoController != null) {
                 List<MetodosdePago> metodos = metodosPagoController.listarMetodos();
                 comboMetodoPago.setItems(FXCollections.observableArrayList(metodos));
                 if (!metodos.isEmpty()) comboMetodoPago.getSelectionModel().select(0);
-            }
-            
-            if (pedidoEditar != null) {
-                this.pedidoEnEdicion = pedidoEditar;
-
-                comboCliente.getSelectionModel().select(
-                    clientes.stream().filter(c -> c.getId() == pedidoEditar.getClienteId()).findFirst().orElse(null)
-                );
-                comboTasaCambio.getSelectionModel().select(
-                    tasas.stream().filter(t -> t.getValor().equals(pedidoEditar.getTasaCambioAplicada())).findFirst().orElse(null)
-                );
-                actualizarTasaCambioComboVisual();
-
-                chkEntregado.setSelected(pedidoEditar.isEntregado());
-
-                List<DetallePedido> dets = pedidosController.obtenerDetallesDePedido(pedidoEditar.getId());
-                detalles.clear();
-                for (DetallePedido d : dets) {
-                    DetallePedidoRow r = new DetallePedidoRow();
-                    r.setProducto(productosController.obtenerProductoPorId(d.getIdProducto()));
-                    r.setCantidad(d.getCantidad());
-                    r.setPrecioUnitario(d.getPrecioUnitario());
-                    r.setPrecio(d.getPrecioUnitario());
-                    detalles.add(r);
-                }
-
-                String descripcionMetodoPago = pedidosController.getPedidosDAO().obtenerMetodoPago(pedidoEditar.getId());
-                if (descripcionMetodoPago != null && !descripcionMetodoPago.isBlank()) {
-                    comboMetodoPago.getItems().stream()
-                            .filter(m -> descripcionMetodoPago.equals(m.getDescripcion()))
-                            .findFirst().ifPresent(m -> comboMetodoPago.getSelectionModel().select(m));
-                }
             }
             actualizarTotales();
         } catch (Exception e) {
@@ -174,9 +139,55 @@ public class PedidoFormController {
             e.printStackTrace();
         }
     }
-    
+
+    public void cargarDatosDespuesDeSetController(Pedidos pedidoEditar) {
+        try {
+            cargarDatosIniciales(); // Reutiliza para cargar listas base
+            this.pedidoEnEdicion = pedidoEditar;
+
+            comboCliente.getSelectionModel().select(
+                clientesController.obtenerTodosLosClientes().stream()
+                    .filter(c -> c.getId() == pedidoEditar.getClienteId())
+                    .findFirst().orElse(null)
+            );
+
+            comboTasaCambio.getSelectionModel().select(
+                tasaCambioController.obtenerTodasLasTasasCambio().stream()
+                    .filter(t -> t.getValor().equals(pedidoEditar.getTasaCambioAplicada()))
+                    .findFirst().orElse(null)
+            );
+
+            actualizarTasaCambioComboVisual();
+
+            chkEntregado.setSelected(pedidoEditar.isEntregado());
+
+            List<DetallePedido> dets = pedidosController.obtenerDetallesDePedido(pedidoEditar.getId());
+            detalles.clear();
+            for (DetallePedido d : dets) {
+                DetallePedidoRow r = new DetallePedidoRow();
+                r.setProducto(productosController.obtenerProductoPorId(d.getIdProducto()));
+                r.setCantidad(d.getCantidad());
+                r.setPrecioUnitario(d.getPrecioUnitario());
+                r.setPrecio(d.getPrecioUnitario());
+                detalles.add(r);
+            }
+
+            String descripcionMetodoPago = pedidosController.getPedidosDAO().obtenerMetodoPago(pedidoEditar.getId());
+            if (descripcionMetodoPago != null && !descripcionMetodoPago.isBlank()) {
+                comboMetodoPago.getItems().stream()
+                        .filter(m -> descripcionMetodoPago.equals(m.getDescripcion()))
+                        .findFirst()
+                        .ifPresent(m -> comboMetodoPago.getSelectionModel().select(m));
+            }
+
+            actualizarTotales();
+        } catch (Exception e) {
+            lblMensaje.setText("Error cargando datos: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     private void actualizarTasaCambioComboVisual() {
-        // Mostrar solo el valor numérico de la tasa en el combo
         comboTasaCambio.setCellFactory(lv -> new ListCell<TasadeCambio>() {
             @Override
             protected void updateItem(TasadeCambio item, boolean empty) {
@@ -201,38 +212,33 @@ public class PedidoFormController {
         });
     }
 
-   private void abrirSelectorProducto() {
-    try {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/SeleccionProductoForm.fxml"));
-        Parent root = loader.load();
-
-        SeleccionProductoFormController controladorSelec = loader.getController();
-        controladorSelec.setProductos(productosController.obtenerTodosLosProductos());
-
-        Stage stage = new Stage();
-        stage.setScene(new Scene(root));
-        stage.setTitle("Seleccionar Producto");
-        stage.initModality(Modality.APPLICATION_MODAL);
-        stage.showAndWait();
-
-        if (controladorSelec.isAgregado()) {
-            Productos productoSel = controladorSelec.getProductoSeleccionado();
-            int cantidadSel = controladorSelec.getCantidadSeleccionada();
-
-            DetallePedidoRow nuevaFila = new DetallePedidoRow();
-            nuevaFila.setProducto(productoSel);
-            nuevaFila.setCantidad(cantidadSel);
-            nuevaFila.setPrecioUnitario(productoSel.getPrecioUsd());
-            nuevaFila.setPrecio(productoSel.getPrecioUsd());
-            detalles.add(nuevaFila);
-            actualizarTotales();
+    private void abrirSelectorProducto() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/SeleccionProductoForm.fxml"));
+            Parent root = loader.load();
+            SeleccionProductoFormController controladorSelec = loader.getController();
+            controladorSelec.setProductos(productosController.obtenerTodosLosProductos());
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Seleccionar Producto");
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+            if (controladorSelec.isAgregado()) {
+                Productos productoSel = controladorSelec.getProductoSeleccionado();
+                int cantidadSel = controladorSelec.getCantidadSeleccionada();
+                DetallePedidoRow nuevaFila = new DetallePedidoRow();
+                nuevaFila.setProducto(productoSel);
+                nuevaFila.setCantidad(cantidadSel);
+                nuevaFila.setPrecioUnitario(productoSel.getPrecioUsd());
+                nuevaFila.setPrecio(productoSel.getPrecioUsd());
+                detalles.add(nuevaFila);
+                actualizarTotales();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            lblMensaje.setText("Error al abrir selector producto: " + ex.getMessage());
         }
-    } catch (Exception ex) {
-        ex.printStackTrace();
-        lblMensaje.setText("Error al abrir selector producto: " + ex.getMessage());
     }
-}
-
 
     private void actualizarTotales() {
         BigDecimal totalUsd = BigDecimal.ZERO;
@@ -258,73 +264,88 @@ public class PedidoFormController {
         lblEstado.setText(texto);
     }
 
-    private void guardarPedido(ActionEvent event) {
-        lblMensaje.setText("");
-        try {
-            Clientes cliente = comboCliente.getSelectionModel().getSelectedItem();
-            TasadeCambio tasa = comboTasaCambio.getSelectionModel().getSelectedItem();
-            MetodosdePago metodoPago = comboMetodoPago.getSelectionModel().getSelectedItem();
-            if (cliente == null) {
-                lblMensaje.setText("Debe seleccionar cliente");
-                return;
-            }
-            if (detalles.isEmpty()) {
-                lblMensaje.setText("Agregue al menos 1 producto");
-                return;
-            }
-            for (DetallePedidoRow row : detalles) {
-                if (row.getProducto() == null || row.getCantidad() <= 0 || row.getPrecio().compareTo(BigDecimal.ZERO) <= 0) {
-                    lblMensaje.setText("Complete todos los productos y cantidades > 0");
-                    return;
-                }
-            }
-            if (metodoPago == null) {
-                lblMensaje.setText("Debe seleccionar el método de pago");
-                return;
-            }
-            BigDecimal totalUsd = detalles.stream().map(DetallePedidoRow::getSubtotal).reduce(BigDecimal.ZERO, BigDecimal::add);
-            if (pedidoEnEdicion == null) {
-                // Nuevo pedido
-                Pedidos nuevoPedido = new Pedidos(0, cliente.getId(), LocalDateTime.now(), totalUsd, tasa.getValor(), chkEntregado.isSelected());
-                pedidosController.crearPedidoConDetalles(
-                        nuevoPedido,
-                        detalles.stream().map(r -> r.toDetalle(nuevoPedido.getId())).toList()
-                );
-                if (chkPagado.isSelected()) {
-                    PagosPedido pago = new PagosPedido();
-                    pago.setIdPedido(nuevoPedido.getId());
-                    pago.setIdMetodoPago(metodoPago.getId());
-                    pago.setTipoMoneda(PagosPedido.TipoMoneda.USD);
-                    pago.setMonto(nuevoPedido.getTotalUsd());
-                    pago.setFechaPago(LocalDateTime.now());
-                    pagosPedidoController.registrarPago(pago);
-                }
-                lblMensaje.setStyle("-fx-text-fill: green;");
-                lblMensaje.setText("Pedido guardado correctamente.");
-            } else {
-                // Edición básica: actualizar pedido y detalles
-                pedidoEnEdicion.setClienteId(cliente.getId());
-                pedidoEnEdicion.setEntregado(chkEntregado.isSelected());
-                pedidoEnEdicion.setTasaCambioAplicada(tasa.getValor());
-                pedidosController.crearPedidoConDetalles(
-                        pedidoEnEdicion,
-                        detalles.stream().map(r -> r.toDetalle(pedidoEnEdicion.getId())).toList()
-                );
-                lblMensaje.setStyle("-fx-text-fill: green;");
-                lblMensaje.setText("Pedido actualizado correctamente.");
-            }
-            cerrar();
-        } catch (Exception ex) {
-            lblMensaje.setStyle("-fx-text-fill: red;");
-            lblMensaje.setText("Error al guardar pedido: " + ex.getMessage());
-            ex.printStackTrace();
-        }
-    }
+@FXML
+private void guardarPedido(ActionEvent event) {
+    lblMensaje.setText("");
+    try {
+        Clientes cliente = comboCliente.getSelectionModel().getSelectedItem();
+        TasadeCambio tasa = comboTasaCambio.getSelectionModel().getSelectedItem();
+        MetodosdePago metodoPago = comboMetodoPago.getSelectionModel().getSelectedItem();
 
-    private void cerrar() {
-        Stage st = (Stage) btnGuardar.getScene().getWindow();
-        st.close();
+        if (cliente == null) {
+            lblMensaje.setText("Debe seleccionar cliente");
+            return;
+        }
+        if (detalles.isEmpty()) {
+            lblMensaje.setText("Agregue al menos 1 producto");
+            return;
+        }
+        for (DetallePedidoRow row : detalles) {
+            if (row.getProducto() == null || row.getCantidad() <= 0 || row.getPrecio().compareTo(BigDecimal.ZERO) <= 0) {
+                lblMensaje.setText("Complete todos los productos y cantidades > 0");
+                return;
+            }
+        }
+        if (metodoPago == null) {
+            lblMensaje.setText("Debe seleccionar el método de pago");
+            return;
+        }
+        BigDecimal totalUsd = detalles.stream().map(DetallePedidoRow::getSubtotal).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        if (pedidoEnEdicion == null) {
+            Pedidos nuevoPedido = new Pedidos(0, cliente.getId(), LocalDateTime.now(), totalUsd, tasa.getValor(), chkEntregado.isSelected(), chkPagado.isSelected());
+            pedidosController.crearPedidoConDetalles(
+                    nuevoPedido,
+                    detalles.stream().map(r -> r.toDetalle(nuevoPedido.getId())).toList()
+            );
+            if (chkPagado.isSelected()) {
+                PagosPedido pago = new PagosPedido();
+                pago.setIdPedido(nuevoPedido.getId());
+                pago.setIdMetodoPago(metodoPago.getId());
+                pago.setTipoMoneda(PagosPedido.TipoMoneda.USD);
+                pago.setMonto(nuevoPedido.getTotalUsd());
+                pago.setFechaPago(LocalDateTime.now());
+                pagosPedidoController.registrarPago(pago);
+
+                pedidosController.actualizarEstadoPago(nuevoPedido.getId()); // Actualiza el estado pagado
+            }
+            lblMensaje.setStyle("-fx-text-fill: green;");
+            lblMensaje.setText("Pedido guardado correctamente.");
+        } else {
+            pedidoEnEdicion.setClienteId(cliente.getId());
+            pedidoEnEdicion.setEntregado(chkEntregado.isSelected());
+            pedidoEnEdicion.setTasaCambioAplicada(tasa.getValor());
+            pedidosController.crearPedidoConDetalles(
+                    pedidoEnEdicion,
+                    detalles.stream().map(r -> r.toDetalle(pedidoEnEdicion.getId())).toList()
+            );
+            pedidosController.actualizarEstadoPago(pedidoEnEdicion.getId());  // Actualiza el estado pagado
+            
+            lblMensaje.setStyle("-fx-text-fill: green;");
+            lblMensaje.setText("Pedido actualizado correctamente.");
+        }
+
+        if (pedidosViewController != null) {
+            pedidosViewController.cargarPedidos();
+            pedidosViewController.getTablaPedidos().refresh();
+        }
+
+        cerrar();
+
+    } catch (Exception ex) {
+        lblMensaje.setStyle("-fx-text-fill: red;");
+        lblMensaje.setText("Error al guardar pedido: " + ex.getMessage());
+        ex.printStackTrace();
     }
+}
+
+
+private void cerrar() {
+    Stage stage = (Stage) btnGuardar.getScene().getWindow();
+    stage.close();
+}
+
+
 
     public static class DetallePedidoRow {
         private final ObjectProperty<Productos> producto = new SimpleObjectProperty<>();
@@ -343,24 +364,19 @@ public class PedidoFormController {
             }
         }
         public ObjectProperty<Productos> productoProperty() { return producto; }
-
         public int getCantidad() { return cantidad.get(); }
         public void setCantidad(int c) { cantidad.set(c); }
         public IntegerProperty cantidadProperty() { return cantidad; }
-
         public BigDecimal getPrecioUnitario() { return precioUnitario.get(); }
         public void setPrecioUnitario(BigDecimal val) { precioUnitario.set(val); }
         public ObjectProperty<BigDecimal> precioUnitarioProperty() { return precioUnitario; }
-
         public BigDecimal getPrecio() { return precio.get(); }
         public void setPrecio(BigDecimal val) { precio.set(val); }
         public ObjectProperty<BigDecimal> precioProperty() { return precio; }
-
         public BigDecimal getSubtotal() { return getPrecio().multiply(BigDecimal.valueOf(getCantidad())); }
         public ReadOnlyObjectWrapper<BigDecimal> subtotalProperty() {
             return new ReadOnlyObjectWrapper<>(getSubtotal());
         }
-
         public DetallePedido toDetalle(int idPedido) {
             DetallePedido d = new DetallePedido();
             d.setIdPedido(idPedido);

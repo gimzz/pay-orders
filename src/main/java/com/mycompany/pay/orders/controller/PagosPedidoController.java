@@ -9,12 +9,6 @@ import java.util.List;
 import com.mycompany.pay.orders.dao.PagosPedidoDAO;
 import com.mycompany.pay.orders.model.PagosPedido;
 
-/**
- * Controlador para manejar la lógica de negocio relacionada con Pagos de Pedido.
- * Usa internamente un PagosPedidoDAO para acceder a la base de datos.
- * 
- * @author gimz
- */
 public class PagosPedidoController {
 
     private final PagosPedidoDAO pagosPedidoDAO;

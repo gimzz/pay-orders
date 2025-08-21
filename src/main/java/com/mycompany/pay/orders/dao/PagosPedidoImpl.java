@@ -18,29 +18,28 @@ public class PagosPedidoImpl implements PagosPedidoDAO {
     }
 
     @Override
-    public void registrarPago(PagosPedido pago) throws SQLException {
-        String sql = "INSERT INTO system.pagos_pedido " +
-                "(id_pedido, id_metodo_pago, tipo_moneda, monto, fecha_pago) " +
-                "VALUES (?, ?, ?, ?, ?)";
-        try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setInt(1, pago.getIdPedido());
-            ps.setInt(2, pago.getIdMetodoPago());
-            ps.setString(3, pago.getTipoMoneda().name());
-            ps.setBigDecimal(4, pago.getMonto());
-            ps.setTimestamp(5, Timestamp.valueOf(pago.getFechaPago()));
-
-            int filas = ps.executeUpdate();
-            if (filas == 0) {
-                throw new SQLException("No se pudo insertar el pago.");
-            }
-
-            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    pago.setId(generatedKeys.getInt(1));
-                }
+public void registrarPago(PagosPedido pago) throws SQLException {
+    String sql = "INSERT INTO system.pagos_pedido " +
+            "(id_pedido, id_metodo_pago, tipo_moneda, monto, fecha_pago) " +
+            "VALUES (?, ?, ?::moneda_enum, ?, ?)";
+    try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        ps.setInt(1, pago.getIdPedido());
+        ps.setInt(2, pago.getIdMetodoPago());
+        ps.setString(3, pago.getTipoMoneda().name());
+        ps.setBigDecimal(4, pago.getMonto());
+        ps.setTimestamp(5, Timestamp.valueOf(pago.getFechaPago()));
+        int filas = ps.executeUpdate();
+        if (filas == 0) {
+            throw new SQLException("No se pudo insertar el pago.");
+        }
+        try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+            if (generatedKeys.next()) {
+                pago.setId(generatedKeys.getInt(1));
             }
         }
     }
+}
+
 
     @Override
     public List<PagosPedido> obtenerPagosPorPedido(int idPedido) throws SQLException {

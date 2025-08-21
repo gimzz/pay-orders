@@ -1,16 +1,10 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.pay.orders.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 
-/**
- *
- * @author gimz
- */
 public class Pedidos {
 
     private int id;
@@ -19,17 +13,21 @@ public class Pedidos {
     private BigDecimal totalUsd;
     private BigDecimal tasaCambioAplicada;
     private boolean entregado;
+    private BooleanProperty pagado;
 
     public Pedidos() {
+        this.pagado = new SimpleBooleanProperty(this, "pagado", false);
     }
 
-    public Pedidos(int id, int clienteId, LocalDateTime fechaPedido, BigDecimal totalUsd, BigDecimal tasaCambioAplicada, boolean entregado) {
+    public Pedidos(int id, int clienteId, LocalDateTime fechaPedido, BigDecimal totalUsd,
+                   BigDecimal tasaCambioAplicada, boolean entregado, boolean pagado) {
         this.id = id;
         this.clienteId = clienteId;
         this.fechaPedido = fechaPedido;
         this.totalUsd = totalUsd;
         this.tasaCambioAplicada = tasaCambioAplicada;
         this.entregado = entregado;
+        this.pagado = new SimpleBooleanProperty(this, "pagado", pagado);
     }
 
     public int getId() {
@@ -78,5 +76,17 @@ public class Pedidos {
 
     public void setEntregado(boolean entregado) {
         this.entregado = entregado;
+    }
+
+    public boolean isPagado() {
+        return pagado.get();
+    }
+
+    public void setPagado(boolean pagado) {
+        this.pagado.set(pagado);
+    }
+
+    public BooleanProperty pagadoProperty() {
+        return pagado;
     }
 }

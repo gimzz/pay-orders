@@ -6,7 +6,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-
+import javafx.beans.binding.Bindings;
+import com.mycompany.pay.orders.dao.MetodosdePagoDAO;
+import com.mycompany.pay.orders.dao.MetodosdePagoDAOImpl;
 import com.mycompany.pay.orders.dao.PagosPedidoDAO;
 import com.mycompany.pay.orders.dao.PagosPedidoImpl;
 import com.mycompany.pay.orders.dao.ProductosDAO;
@@ -14,8 +16,11 @@ import com.mycompany.pay.orders.dao.ProductosDAOImpl;
 import com.mycompany.pay.orders.dao.TasadeCambioDAO;
 import com.mycompany.pay.orders.dao.TasadeCambioDAOImpl;
 import com.mycompany.pay.orders.model.Clientes;
+import com.mycompany.pay.orders.model.PagosPedido;
 import com.mycompany.pay.orders.model.Pedidos;
-
+import java.time.LocalDateTime;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -26,11 +31,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class PedidosViewController {
+
     @FXML
     private TableView<Pedidos> tablaPedidos;
     @FXML
@@ -51,9 +56,12 @@ public class PedidosViewController {
     private TableColumn<Pedidos, String> colMetodoPago;
     @FXML
     private Label lblMensaje;
+    @FXML
+
 
     private ObservableList<Pedidos> listaPedidos;
     private PedidosController pedidosController;
+    private PagosPedidoController pagosPedidoController;
     private ClientesController clientesController;
     private Connection connection;
 
@@ -65,7 +73,13 @@ public class PedidosViewController {
         TasadeCambioDAO tasaCambioDAO = new TasadeCambioDAOImpl(connection);
         TasadeCambioController tasaCambioController = new TasadeCambioController(tasaCambioDAO);
         this.pedidosController = new PedidosController(connection, productosDAO, pagosPedidoDAO, tasaCambioController);
+           this.pagosPedidoController = new PagosPedidoController(pagosPedidoDAO);
+
         cargarPedidos();
+    }
+
+    public TableView<Pedidos> getTablaPedidos() {
+        return tablaPedidos;
     }
 
     @FXML
@@ -96,7 +110,7 @@ public class PedidosViewController {
             }
         });
 
-        colTotalUsd.setCellValueFactory(new PropertyValueFactory<>("totalUsd"));
+        colTotalUsd.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getTotalUsd()));
 
         colTotalBsd.setCellValueFactory(cellData -> {
             Pedidos pedido = cellData.getValue();
@@ -108,22 +122,19 @@ public class PedidosViewController {
             }
         });
 
-        colTasaCambio.setCellValueFactory(new PropertyValueFactory<>("tasaCambioAplicada"));
+        colTasaCambio.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getTasaCambioAplicada()));
 
         colEntregado.setCellValueFactory(cellData -> {
             boolean entregado = cellData.getValue().isEntregado();
             return new SimpleStringProperty(entregado ? "Entregado" : "No entregado");
         });
 
-        colEstadoPago.setCellValueFactory(cellData -> {
-            try {
-                String estadoPago = pedidosController.getPedidosDAO().obtenerEstadoPago(cellData.getValue().getId());
-                return new SimpleStringProperty(estadoPago);
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return new SimpleStringProperty("ERROR");
-            }
-        });
+colEstadoPago.setCellValueFactory(cellData -> 
+    Bindings.createStringBinding(() -> 
+        cellData.getValue().isPagado() ? "Pagado" : "Pendiente", 
+        cellData.getValue().pagadoProperty())
+);
+
 
         colMetodoPago.setCellValueFactory(cellData -> {
             try {
@@ -139,44 +150,99 @@ public class PedidosViewController {
         tablaPedidos.setItems(listaPedidos);
     }
 
-    private void cargarPedidos() {
-        try {
-            List<Pedidos> pedidos = pedidosController.obtenerTodosLosPedidos();
+    void cargarPedidos() {
+    try {
+        List<Pedidos> pedidos = pedidosController.obtenerTodosLosPedidos();
+        if (listaPedidos == null) {
+            listaPedidos = FXCollections.observableArrayList(pedidos);
+            tablaPedidos.setItems(listaPedidos);
+        } else {
             listaPedidos.setAll(pedidos);
-            lblMensaje.setText("");
-        } catch (SQLException e) {
-            lblMensaje.setText("Error al cargar pedidos: " + e.getMessage());
-            e.printStackTrace();
+        }
+        lblMensaje.setText("");
+    } catch (SQLException e) {
+        lblMensaje.setText("Error al cargar pedidos: " + e.getMessage());
+        e.printStackTrace();
+    }
+}
+
+
+    public void recargarTablaPedidos() {
+        cargarPedidos();
+        for (TableColumn<Pedidos, ?> col : tablaPedidos.getColumns()) {
+            boolean visible = col.isVisible();
+            col.setVisible(false);
+            col.setVisible(visible);
         }
     }
+
+@FXML
+private void actualizarEstadoPagoSeleccionado() {
+    Pedidos seleccionado = tablaPedidos.getSelectionModel().getSelectedItem();
+    if (seleccionado == null) {
+        lblMensaje.setText("Seleccione un pedido para actualizar el estado de pago.");
+        return;
+    }
+    try {
+        double totalPagadoActual = pagosPedidoController.obtenerTotalPagadoPorPedido(seleccionado.getId());
+
+        if (totalPagadoActual < seleccionado.getTotalUsd().doubleValue()) {
+            PagosPedido pago = new PagosPedido();
+            pago.setIdPedido(seleccionado.getId());
+
+            pago.setIdMetodoPago(1);
+
+
+            pago.setTipoMoneda(PagosPedido.TipoMoneda.USD);
+            pago.setMonto(BigDecimal.valueOf(seleccionado.getTotalUsd().doubleValue() - totalPagadoActual));
+            pago.setFechaPago(LocalDateTime.now());
+            pagosPedidoController.registrarPago(pago);
+        }
+
+        pedidosController.actualizarEstadoPago(seleccionado.getId());
+
+        cargarPedidos();
+        tablaPedidos.refresh();
+
+        lblMensaje.setText("Estado de pago actualizado correctamente.");
+    } catch (SQLException e) {
+        lblMensaje.setText("Error al actualizar el estado de pago: " + e.getMessage());
+        e.printStackTrace();
+    }
+}
+
+
+
+
 
     @FXML
     private void abrirFormularioNuevoPedido() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/PedidoFormView.fxml"));
             Parent root = loader.load();
-
             PedidoFormController controller = loader.getController();
-
+            controller.setPedidosViewController(this);
+            MetodosdePagoDAO metodosPagoDAO = new MetodosdePagoDAOImpl(connection);
+            MetodosdePagoController metodosPagoController = new MetodosdePagoController(metodosPagoDAO);
             controller.setControllers(
-                pedidosController,
-                new ProductosController(pedidosController.getProductosDAO()),
-                pedidosController.getTasaCambioController(),
-                clientesController,
-                null, // Métodos de pago no definido, pasar null si no tienes controlador
-                new PagosPedidoController(pedidosController.getPagosPedidoDAO())
+                    pedidosController,
+                    new ProductosController(pedidosController.getProductosDAO()),
+                    pedidosController.getTasaCambioController(),
+                    clientesController,
+                    metodosPagoController,
+                    new PagosPedidoController(pedidosController.getPagosPedidoDAO())
             );
-
-            controller.cargarDatosDespuesDeSetController(null);
-
+            controller.cargarDatosIniciales();
             Stage stage = new Stage();
             stage.setTitle("Nuevo Pedido");
             stage.setScene(new Scene(root));
+            stage.setWidth(700);
+            stage.setHeight(600);
+            stage.setMinWidth(600);
+            stage.setMinHeight(500);
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
-
-            cargarPedidos();
-
+            recargarTablaPedidos();
         } catch (Exception e) {
             lblMensaje.setText("Error al abrir formulario nuevo pedido: " + e.getMessage());
             e.printStackTrace();
@@ -193,28 +259,29 @@ public class PedidosViewController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/PedidoFormView.fxml"));
             Parent root = loader.load();
-
             PedidoFormController controller = loader.getController();
-
+            controller.setPedidosViewController(this);
+            MetodosdePagoDAO metodosPagoDAO = new MetodosdePagoDAOImpl(connection);
+            MetodosdePagoController metodosPagoController = new MetodosdePagoController(metodosPagoDAO);
             controller.setControllers(
-                pedidosController,
-                new ProductosController(pedidosController.getProductosDAO()),
-                pedidosController.getTasaCambioController(),
-                clientesController,
-                null, // Métodos de pago no definido, pasar null
-                new PagosPedidoController(pedidosController.getPagosPedidoDAO())
+                    pedidosController,
+                    new ProductosController(pedidosController.getProductosDAO()),
+                    pedidosController.getTasaCambioController(),
+                    clientesController,
+                    metodosPagoController,
+                    new PagosPedidoController(pedidosController.getPagosPedidoDAO())
             );
-
             controller.cargarDatosDespuesDeSetController(seleccionado);
-
             Stage stage = new Stage();
             stage.setTitle("Editar Pedido");
             stage.setScene(new Scene(root));
+            stage.setWidth(700);
+            stage.setHeight(600);
+            stage.setMinWidth(600);
+            stage.setMinHeight(500);
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
-
-            cargarPedidos();
-
+            recargarTablaPedidos();
         } catch (Exception e) {
             lblMensaje.setText("Error al abrir formulario edición: " + e.getMessage());
             e.printStackTrace();
@@ -230,7 +297,7 @@ public class PedidosViewController {
         }
         try {
             pedidosController.eliminarPedidoCompleto(seleccionado.getId());
-            cargarPedidos();
+            recargarTablaPedidos();
             lblMensaje.setText("Pedido eliminado correctamente.");
         } catch (SQLException e) {
             lblMensaje.setText("Error al eliminar pedido: " + e.getMessage());
@@ -248,13 +315,11 @@ public class PedidosViewController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/ProductosClienteView.fxml"));
             Parent root = loader.load();
-
             ProductosClienteController controller = loader.getController();
             controller.setPedidosController(pedidosController);
             ProductosController productosController = new ProductosController(new ProductosDAOImpl(connection));
             controller.setProductosController(productosController);
             controller.setClienteId(seleccionado.getClienteId());
-
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
             stage.setTitle("Productos del Cliente: " + seleccionado.getClienteId());
@@ -264,7 +329,6 @@ public class PedidosViewController {
             stage.setMinHeight(400);
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
-
         } catch (Exception e) {
             lblMensaje.setText("Error al abrir ventana de productos: " + e.getMessage());
             e.printStackTrace();
@@ -281,15 +345,11 @@ public class PedidosViewController {
         try {
             boolean nuevoEstado = !seleccionado.isEntregado();
             pedidosController.actualizarEstadoEntrega(seleccionado.getId(), nuevoEstado);
-            cargarPedidos();
+            recargarTablaPedidos();
             lblMensaje.setText("Estado de entrega actualizado.");
         } catch (SQLException e) {
             lblMensaje.setText("Error al actualizar estado de entrega: " + e.getMessage());
             e.printStackTrace();
         }
-    }
-
-    public PedidosController getPedidosController() {
-        return pedidosController;
     }
 }

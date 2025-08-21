@@ -28,10 +28,12 @@ public class MetodosdePagoController {
         }
         return metodosPagoDAO.obtenerMetododePagoPorId(id);
     }
+    
 
     public List<MetodosdePago> listarMetodos() throws SQLException {
         return metodosPagoDAO.obtenerTodoslosMetodosdePago();
     }
+    
 
     public void actualizarMetodo(MetodosdePago metodo) throws SQLException {
         if (metodo == null || metodo.getId() <= 0) {

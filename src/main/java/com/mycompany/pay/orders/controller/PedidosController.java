@@ -24,7 +24,7 @@ public class PedidosController {
     private PagosPedidoDAO pagosPedidoDAO;
 
     public PedidosController(Connection connection, ProductosDAO productosDAO, PagosPedidoDAO pagosPedidoDAO,
-                             TasadeCambioController tasaCambioController) {
+            TasadeCambioController tasaCambioController) {
         this.connection = connection;
         this.pedidosDAO = new PedidosDAOImpl(connection);
         this.detallesDAO = new DetallePedidoDAOImpl(connection);
@@ -78,6 +78,7 @@ public class PedidosController {
         return detallesDAO.obtenerDetallesPorPedido(idPedido);
     }
 
+
     private void actualizarTotalPedido(int pedidoId) throws SQLException {
         List<DetallePedido> detalles = detallesDAO.obtenerDetallesPorPedido(pedidoId);
         BigDecimal total = BigDecimal.ZERO;
@@ -101,9 +102,9 @@ public class PedidosController {
         if (pedido == null) {
             throw new IllegalArgumentException("Pedido no encontrado");
         }
-        String estadoPago = pedidosDAO.obtenerEstadoPago(pedidoId);
+        boolean pagado = pedidosDAO.obtenerPagadoPorPedido(pedidoId);
         boolean entregado = pedido.isEntregado();
-        if (entregado && "PAGADO".equalsIgnoreCase(estadoPago)) {
+        if (entregado && pagado) {
             throw new IllegalStateException("No se pueden modificar pedidos cerrados (pagados y entregados).");
         }
     }
@@ -133,30 +134,35 @@ public class PedidosController {
     public void actualizarEstadoEntrega(int pedidoId, boolean entregado) throws SQLException {
         pedidosDAO.actualizarEstadoEntrega(pedidoId, entregado);
 
-        double totalPagado = pagosPedidoDAO.obtenerTotalPagadoPorPedido(pedidoId);
-        Pedidos pedido = pedidosDAO.obtenerPedidoPorId(pedidoId);
-
-        if (pedido == null) {
-            throw new IllegalArgumentException("Pedido no encontrado");
-        }
-
-        double totalPedido = pedido.getTotalUsd().doubleValue();
-        String nuevoEstadoPago = (totalPagado >= totalPedido) ? "PAGADO" : "PENDIENTE";
-
-        pedidosDAO.actualizarEstadoPago(pedidoId, nuevoEstadoPago);
+        actualizarEstadoPago(pedidoId);
     }
+  
+  public void actualizarEstadoPago(int pedidoId) throws SQLException {
+    double totalPagado = pagosPedidoDAO.obtenerTotalPagadoPorPedido(pedidoId);
+    Pedidos pedido = pedidosDAO.obtenerPedidoPorId(pedidoId);
+    if (pedido == null) throw new IllegalArgumentException("Pedido no encontrado");
+    double totalPedido = pedido.getTotalUsd().doubleValue();
+    boolean pagado = totalPagado >= totalPedido && totalPedido > 0;
+
+    pedidosDAO.actualizarPagado(pedidoId, pagado);  // Actualiza en la base de datos
+
+    pedido.setPagado(pagado);  // Actualiza la propiedad observable para UI
+}
+
+
+
+
     public ProductosDAO getProductosDAO() {
-    return productosDAO;
-}
+        return productosDAO;
+    }
 
-public PagosPedidoDAO getPagosPedidoDAO() {
-    return pagosPedidoDAO;
-}
+    public PagosPedidoDAO getPagosPedidoDAO() {
+        return pagosPedidoDAO;
+    }
 
-public TasadeCambioController getTasaCambioController() {
-    return tasaCambioController;
-}
-
+    public TasadeCambioController getTasaCambioController() {
+        return tasaCambioController;
+    }
 
     public void eliminarPedidoCompleto(int pedidoId) throws SQLException {
         try {
