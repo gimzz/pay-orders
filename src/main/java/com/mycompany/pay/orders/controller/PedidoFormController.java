@@ -211,34 +211,44 @@ public class PedidoFormController {
             }
         });
     }
+private void abrirSelectorProducto() {
+    try {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/SeleccionProductoForm.fxml"));
+        Parent root = loader.load();
+        SeleccionProductoFormController controladorSelec = loader.getController();
+        controladorSelec.setProductos(productosController.obtenerTodosLosProductos());
 
-    private void abrirSelectorProducto() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/SeleccionProductoForm.fxml"));
-            Parent root = loader.load();
-            SeleccionProductoFormController controladorSelec = loader.getController();
-            controladorSelec.setProductos(productosController.obtenerTodosLosProductos());
-            Stage stage = new Stage();
-            stage.setScene(new Scene(root));
-            stage.setTitle("Seleccionar Producto");
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.showAndWait();
-            if (controladorSelec.isAgregado()) {
-                Productos productoSel = controladorSelec.getProductoSeleccionado();
-                int cantidadSel = controladorSelec.getCantidadSeleccionada();
-                DetallePedidoRow nuevaFila = new DetallePedidoRow();
-                nuevaFila.setProducto(productoSel);
-                nuevaFila.setCantidad(cantidadSel);
-                nuevaFila.setPrecioUnitario(productoSel.getPrecioUsd());
-                nuevaFila.setPrecio(productoSel.getPrecioUsd());
-                detalles.add(nuevaFila);
-                actualizarTotales();
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            lblMensaje.setText("Error al abrir selector producto: " + ex.getMessage());
+        Stage stage = new Stage();
+        stage.setScene(new Scene(root));
+        stage.setTitle("Seleccionar Producto");
+        stage.initModality(Modality.APPLICATION_MODAL);
+
+        // Tamaño inicial + mínimos
+        stage.setWidth(600);
+        stage.setHeight(450);
+        stage.setMinWidth(580);
+        stage.setMinHeight(400);
+        stage.centerOnScreen();
+
+        stage.showAndWait();
+
+        if (controladorSelec.isAgregado()) {
+            Productos productoSel = controladorSelec.getProductoSeleccionado();
+            int cantidadSel = controladorSelec.getCantidadSeleccionada();
+            DetallePedidoRow nuevaFila = new DetallePedidoRow();
+            nuevaFila.setProducto(productoSel);
+            nuevaFila.setCantidad(cantidadSel);
+            nuevaFila.setPrecioUnitario(productoSel.getPrecioUsd());
+            nuevaFila.setPrecio(productoSel.getPrecioUsd());
+            detalles.add(nuevaFila);
+            actualizarTotales();
         }
+    } catch (Exception ex) {
+        ex.printStackTrace();
+        lblMensaje.setText("Error al abrir selector producto: " + ex.getMessage());
     }
+}
+
 
     private void actualizarTotales() {
         BigDecimal totalUsd = BigDecimal.ZERO;
