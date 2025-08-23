@@ -1,6 +1,9 @@
-
 package com.mycompany.pay.orders.controller;
 
+import com.mycompany.pay.orders.dao.MateriaPrimaDAO;
+import com.mycompany.pay.orders.dao.MateriaPrimaDAOImpl;
+import com.mycompany.pay.orders.dao.MovimientoMateriaPrimaDAO;
+import com.mycompany.pay.orders.dao.MovimientoMateriaPrimaDAOImpl;
 import com.mycompany.pay.orders.dao.ClientesDAO;
 import com.mycompany.pay.orders.dao.ClientesDAOImpl;
 import com.mycompany.pay.orders.dao.UsuarioDAO;
@@ -63,12 +66,32 @@ public class MainController {
             mostrarAlertaError("Error al cargar vista Pedidos", e.getMessage());
         }
     }
+@FXML
+private void abrirPanelMateriaPrima() {
+    try {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/MateriaPrima.fxml"));
+        Parent vista = loader.load();
 
-    @FXML
-    private void abrirPanelInventario() {
-        System.out.println("Funcionalidad Inventario no implementada todavía.");
-        mostrarAlertaInfo("Funcionalidad en Desarrollo", "El módulo Inventario está pendiente por implementar.");
+        Connection connection = DriverManager.getConnection(
+                "jdbc:postgresql://localhost:5432/pay_orders_db",
+                "admin",
+                "admin123"
+        );
+
+        MateriaPrimaDAO materiaPrimaDAO = new MateriaPrimaDAOImpl(connection);
+        MovimientoMateriaPrimaDAO movimientoMateriaPrimaDAO = new MovimientoMateriaPrimaDAOImpl(connection);
+
+        MateriaPrimaController materiaPrimaController = loader.getController();
+        materiaPrimaController.setDAOs(materiaPrimaDAO, movimientoMateriaPrimaDAO);
+
+        panelContenido.getChildren().clear();
+        panelContenido.getChildren().add(vista);
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        mostrarAlertaError("Error al cargar vista Materia Prima", e.getMessage());
     }
+}
 
     private void cargarVistaEnPanel(String rutaFXML) {
         try {

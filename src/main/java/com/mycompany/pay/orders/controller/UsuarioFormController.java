@@ -1,4 +1,3 @@
-
 package com.mycompany.pay.orders.controller;
 
 import java.sql.SQLException;
@@ -29,6 +28,7 @@ public class UsuarioFormController {
     private UsuarioDAO usuarioDAO;
     private Usuario usuarioEdicion; 
     private boolean guardado = false; 
+private Usuario usuarioGuardado;
 
     public void setUsuarioDAO(UsuarioDAO usuarioDAO) {
         this.usuarioDAO = usuarioDAO;
@@ -42,7 +42,6 @@ public class UsuarioFormController {
     public void cargarUsuario(Usuario usuario) {
         this.usuarioEdicion = usuario;
         txtUsuario.setText(usuario.getNombreUsuario());
-        // Nota: No llenamos la contraseña por seguridad
         comboRol.setValue(usuario.getRol());
         chkActivo.setSelected(usuario.isActivo());
     }
@@ -50,55 +49,58 @@ public class UsuarioFormController {
     public boolean isGuardado() {
         return guardado;
     }
+public Usuario getUsuarioGuardado() {
+    return usuarioGuardado;
+}
 
-    @FXML
-    private void handleGuardar() {
-        String nombreUsuario = txtUsuario.getText().trim();
-        String password = txtPassword.getText();
-        Rol rol = comboRol.getValue();
-        boolean activo = chkActivo.isSelected();
+  @FXML
+private void handleGuardar() {
+    String nombreUsuario = txtUsuario.getText().trim();
+    String password = txtPassword.getText();
+    Rol rol = comboRol.getValue();
+    boolean activo = chkActivo.isSelected();
 
-        if (nombreUsuario.isEmpty() || (usuarioEdicion == null && password.isEmpty()) || rol == null) {
-            lblMensaje.setText("Por favor, completa todos los campos obligatorios.");
-            return;
-        }
-
-        if (password.length() > 0 && password.length() < 6) {
-            lblMensaje.setText("La contraseña debe tener al menos 6 caracteres.");
-            return;
-        }
-
-        try {
-            if (usuarioEdicion == null) {
-                Usuario nuevo = new Usuario();
-                nuevo.setNombreUsuario(nombreUsuario);
-                nuevo.setPassword(password);
-                nuevo.setRol(rol);
-                nuevo.setActivo(activo);
-                nuevo.setFechaCreacion(LocalDateTime.now());
-
-                usuarioDAO.agregarUsuario(nuevo);
-
-            } else {
-                usuarioEdicion.setNombreUsuario(nombreUsuario);
-                if (!password.isEmpty()) {
-                    usuarioEdicion.setPassword(password);
-                }
-                usuarioEdicion.setRol(rol);
-                usuarioEdicion.setActivo(activo);
-
-                usuarioDAO.actualizarUsuario(usuarioEdicion);
-            }
-
-            guardado = true;
-            cerrarVentana();
-
-        } catch (SQLException e) {
-            lblMensaje.setText("Error al guardar el usuario: " + e.getMessage());
-            e.printStackTrace();
-        }
-
+    if (nombreUsuario.isEmpty() || (usuarioEdicion == null && password.isEmpty()) || rol == null) {
+        lblMensaje.setText("Por favor, completa todos los campos obligatorios.");
+        return;
     }
+
+    if (password.length() > 0 && password.length() < 6) {
+        lblMensaje.setText("La contraseña debe tener al menos 6 caracteres.");
+        return;
+    }
+
+    try {
+        if (usuarioEdicion == null) {
+            Usuario nuevo = new Usuario();
+            nuevo.setNombreUsuario(nombreUsuario);
+            nuevo.setPassword(password);
+            nuevo.setRol(rol);
+            nuevo.setActivo(activo);
+            nuevo.setFechaCreacion(LocalDateTime.now());
+
+            usuarioDAO.agregarUsuario(nuevo);
+            usuarioGuardado = nuevo;
+
+        } else {
+            usuarioEdicion.setNombreUsuario(nombreUsuario);
+            if (!password.isEmpty()) {
+                usuarioEdicion.setPassword(password);
+            }
+            usuarioEdicion.setRol(rol);
+            usuarioEdicion.setActivo(activo);
+
+            usuarioDAO.actualizarUsuario(usuarioEdicion);
+            usuarioGuardado = usuarioEdicion; // Guardamos el usuario actualizado
+        }
+        guardado = true;
+        cerrarVentana();
+    } catch (SQLException e) {
+        lblMensaje.setText("Error al guardar el usuario: " + e.getMessage());
+        e.printStackTrace();
+    }
+}
+
 
     @FXML
     private void handleCancelar() {

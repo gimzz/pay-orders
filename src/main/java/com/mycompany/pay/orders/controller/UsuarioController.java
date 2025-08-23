@@ -1,4 +1,3 @@
-
 package com.mycompany.pay.orders.controller;
 
 import java.io.IOException;
@@ -43,14 +42,12 @@ public class UsuarioController {
     @FXML
     private Label lblMensaje;
 
-    // Constructor vacío para que JavaFX pueda instanciar el controlador
     public UsuarioController() {
     }
 
-    // Método para inyectar DAO después de cargar la FXML y tener todo inicializado
     public void setUsuarioDAO(UsuarioDAO usuarioDAO) {
         this.usuarioDAO = usuarioDAO;
-        cargarUsuarios(); // carga los usuarios cuando el DAO ya está listo
+        cargarUsuarios();
     }
 
     public void agregarUsuario(Usuario usuario) throws SQLException, IllegalArgumentException {
@@ -126,74 +123,80 @@ public class UsuarioController {
             e.printStackTrace();
         }
     }
-@FXML
-public void abrirFormularioAgregar(ActionEvent event) {
-    try {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/UsuarioForm.fxml"));
-        Parent root = loader.load();
 
-        UsuarioFormController formController = loader.getController();
-        formController.setUsuarioDAO(usuarioDAO);
+    @FXML
+    public void abrirFormularioAgregar(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/UsuarioForm.fxml"));
+            Parent root = loader.load();
 
-        Stage stage = new Stage();
-        stage.setScene(new Scene(root));
-        stage.setTitle("Agregar Nuevo Usuario");
-        stage.initModality(Modality.APPLICATION_MODAL);
+            UsuarioFormController formController = loader.getController();
+            formController.setUsuarioDAO(usuarioDAO);
 
-        stage.setWidth(450);
-        stage.setHeight(350);
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Agregar Nuevo Usuario");
+            stage.initModality(Modality.APPLICATION_MODAL);
 
-        stage.setMinWidth(400);
-        stage.setMinHeight(300);
+            stage.setWidth(450);
+            stage.setHeight(350);
+            stage.setMinWidth(400);
+            stage.setMinHeight(300);
 
-        stage.showAndWait();
+            stage.showAndWait();
 
-        if (formController.isGuardado()) {
-            cargarUsuarios();
-            lblMensaje.setText("Usuario agregado correctamente.");
+            if (formController.isGuardado()) {
+                Usuario nuevoUsuario = formController.getUsuarioGuardado(); // Debes crear este método en UsuarioFormController
+                if (nuevoUsuario != null) {
+                    listaUsuarios.add(nuevoUsuario);
+                } else {
+                    // Por seguridad, recargamos la lista si no podemos obtener usuario nuevo
+                    cargarUsuarios();
+                }
+                lblMensaje.setText("Usuario agregado correctamente.");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            lblMensaje.setText("Error al abrir formulario de agregar usuario.");
         }
-    } catch (IOException e) {
-        e.printStackTrace();
-        lblMensaje.setText("Error al abrir formulario de agregar usuario.");
     }
-}
 
-@FXML
-public void abrirFormularioEditar(ActionEvent event) {
-    Usuario seleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
-    if (seleccionado == null) {
-        lblMensaje.setText("Seleccione un usuario para editar.");
-        return;
-    }
-    try {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/UsuarioForm.fxml"));
-        Parent root = loader.load();
-
-        UsuarioFormController formController = loader.getController();
-        formController.setUsuarioDAO(usuarioDAO);
-        formController.cargarUsuario(seleccionado);
-
-        Stage stage = new Stage();
-        stage.setScene(new Scene(root));
-        stage.setTitle("Editar Usuario");
-        stage.initModality(Modality.APPLICATION_MODAL);
-
-        stage.setWidth(450);
-        stage.setHeight(350);
-        stage.setMinWidth(400);
-        stage.setMinHeight(300);
-
-        stage.showAndWait();
-
-        if (formController.isGuardado()) {
-            cargarUsuarios();
-            lblMensaje.setText("Usuario actualizado correctamente.");
+    @FXML
+    public void abrirFormularioEditar(ActionEvent event) {
+        Usuario seleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
+        if (seleccionado == null) {
+            lblMensaje.setText("Seleccione un usuario para editar.");
+            return;
         }
-    } catch (IOException e) {
-        e.printStackTrace();
-        lblMensaje.setText("Error al abrir formulario de edición de usuario.");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/UsuarioForm.fxml"));
+            Parent root = loader.load();
+
+            UsuarioFormController formController = loader.getController();
+            formController.setUsuarioDAO(usuarioDAO);
+            formController.cargarUsuario(seleccionado);
+
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Editar Usuario");
+            stage.initModality(Modality.APPLICATION_MODAL);
+
+            stage.setWidth(450);
+            stage.setHeight(350);
+            stage.setMinWidth(400);
+            stage.setMinHeight(300);
+
+            stage.showAndWait();
+
+            if (formController.isGuardado()) {
+                cargarUsuarios();
+                lblMensaje.setText("Usuario actualizado correctamente.");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            lblMensaje.setText("Error al abrir formulario de edición de usuario.");
+        }
     }
-}
 
 
     @FXML
