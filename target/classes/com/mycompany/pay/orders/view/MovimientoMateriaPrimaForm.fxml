@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mycompany.pay.orders.controller.MovimientoMateriaPrimaFormController"
+      spacing="10">
+    <padding>
+        <Insets top="15" right="15" bottom="15" left="15" />
+    </padding>
+
+    <Label text="Registrar Movimiento de Materia Prima - Salida" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+    <GridPane hgap="10" vgap="10">
+
+        <Label text="Materia Prima:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+        <ComboBox fx:id="comboMateriaPrima" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250" />
+
+        <Label text="Stock Actual:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+        <Label fx:id="lblStockActual" GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-font-weight: bold;" />
+
+        <Label text="Cantidad a Sacar:" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+        <TextField fx:id="txtCantidad" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="250" />
+
+        <Label text="Motivo:" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+        <TextArea fx:id="txtMotivo" GridPane.rowIndex="3" GridPane.columnIndex="1" prefRowCount="3" prefWidth="250" />
+
+    </GridPane>
+
+    <Label fx:id="lblMensaje" style="-fx-text-fill: red;" wrapText="true"/>
+
+    <HBox spacing="15" alignment="CENTER_RIGHT">
+        <Button text="Guardar" onAction="#handleGuardar" minWidth="80" />
+        <Button text="Cancelar" onAction="#handleCancelar" minWidth="80" />
+    </HBox>
+</VBox>

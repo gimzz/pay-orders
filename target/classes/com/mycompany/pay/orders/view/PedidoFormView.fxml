@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mycompany.pay.orders.controller.PedidoFormController"
+      spacing="15">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label text="Gestión de Pedido" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+    
+    <HBox spacing="10">
+        <Label text="Cliente:"/>
+        <ComboBox fx:id="comboCliente" promptText="Selecciona un cliente..." prefWidth="250"/>
+        <Button fx:id="btnNuevoCliente" text="Nuevo"/>
+    </HBox>
+    
+    <Label text="Productos:" style="-fx-font-weight: bold;"/>
+    
+    <TableView fx:id="tablaProductos" editable="true" prefHeight="200">
+        <columns>
+            <TableColumn fx:id="colProducto" text="Producto" prefWidth="160"/>
+            <TableColumn fx:id="colCantidad" text="Cantidad" prefWidth="75"/>
+            <TableColumn fx:id="colPrecio" text="Precio Unitario" prefWidth="100"/>
+            <TableColumn fx:id="colPrecioUsd" text="Precio USD" prefWidth="100"/>
+            <TableColumn fx:id="colSubtotal" text="Subtotal (USD)" prefWidth="120"/>
+            <TableColumn fx:id="colQuitar" text="Quitar"/>
+        </columns>
+    </TableView>
+    
+    <Button fx:id="btnAgregarProducto" text="Agregar Producto" maxWidth="150"/>
+    
+    <HBox spacing="40" alignment="CENTER_LEFT">
+        <HBox spacing="8">
+            <Label text="Tasa de Cambio:"/>
+            <ComboBox fx:id="comboTasaCambio" prefWidth="120"/>
+        </HBox>
+        <HBox spacing="8">
+            <Label text="Total USD:"/>
+            <Label fx:id="lblTotalUsd" style="-fx-font-weight: bold;"/>
+        </HBox>
+        <HBox spacing="8">
+            <Label text="Total Local:"/>
+            <Label fx:id="lblTotalLocal" style="-fx-font-weight: bold;"/>
+        </HBox>
+    </HBox>
+    
+    <HBox spacing="14" alignment="CENTER_LEFT">
+        <CheckBox fx:id="chkPagado" text="Pagado"/>
+        <CheckBox fx:id="chkEntregado" text="Entregado"/>
+        <Label fx:id="lblEstado" style="-fx-font-weight: bold;"/>
+    </HBox>
+    
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Método de pago:"/>
+        <ComboBox fx:id="comboMetodoPago" promptText="Selecciona..." prefWidth="200"/>
+    </HBox>
+    
+    <HBox spacing="15" alignment="CENTER_RIGHT">
+        <Button fx:id="btnGuardar" text="Guardar Pedido" minWidth="110"/>
+        <Button fx:id="btnCancelar" text="Cancelar" minWidth="90"/>
+    </HBox>
+    
+    <Label fx:id="lblMensaje" wrapText="true" prefWidth="400" prefHeight="60" style="-fx-text-fill: red;"/>
+
+</VBox>

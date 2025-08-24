@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mycompany.pay.orders.controller.MainController"
+      spacing="10">
+    <padding>
+        <Insets top="10" right="10" bottom="10" left="10"/>
+    </padding>
+    <children>
+        <Label text="Sistema de Pedidos - Panel Principal"
+               style="-fx-font-size: 20px; -fx-font-weight: bold;" />
+        <HBox spacing="10">
+            <children>
+                <Button text="Gestión de Usuarios" onAction="#abrirPanelUsuarios" />
+                <Button text="Módulo Pedidos" onAction="#abrirPanelPedidos" />
+                <Button text="Materia Prima" onAction="#abrirPanelMateriaPrima" />
+                <Button text="Módulo Productos" onAction="#abrirPanelProductos" />
+<Button fx:id="btnCerrarSesion" text="Cerrar Sesión" onAction="#handleCerrarSesion" />
+            </children>
+        </HBox>
+        <StackPane fx:id="panelContenido" prefHeight="500" prefWidth="700"
+                   style="-fx-border-color: gray; -fx-border-width: 1;" />
+    </children>
+</VBox>

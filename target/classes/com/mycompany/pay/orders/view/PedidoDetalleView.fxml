@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.mycompany.pay.orders.controller.PedidoDetalleViewController" spacing="15" padding="15">
+
+    <Label text="Detalle de Pedido" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Cliente:"/>
+        <ComboBox fx:id="comboCliente" promptText="Seleccione cliente..." prefWidth="250" />
+        <Button text="Buscar Cliente" fx:id="btnBuscarCliente"/> <!-- opcional buscador o abrir módulo clientes -->
+    </HBox>
+
+    <Label text="Productos del Pedido:" style="-fx-font-weight: bold;"/>
+    <TableView fx:id="tablaProductos" editable="true" prefHeight="250">
+        <columns>
+            <TableColumn fx:id="colProducto" text="Producto" prefWidth="180"/>
+            <TableColumn fx:id="colCantidad" text="Cantidad" prefWidth="70"/>
+            <TableColumn fx:id="colPrecio" text="Precio (USD)" prefWidth="90"/>
+            <TableColumn fx:id="colSubtotal" text="Subtotal (USD)" prefWidth="90"/>
+            <TableColumn fx:id="colQuitar" text="Quitar" prefWidth="65"/>
+        </columns>
+    </TableView>
+    <Button fx:id="btnAgregarProducto" text="Agregar Producto" maxWidth="140"/>
+
+    <HBox spacing="20" alignment="CENTER_LEFT">
+        <Label text="Tasa de Cambio:"/>
+        <ComboBox fx:id="comboTasaCambio" prefWidth="100"/>
+        <Label text="Total USD:"/>
+        <Label fx:id="lblTotalUsd" prefWidth="80"/>
+        <Label text="Total Local:"/>
+        <Label fx:id="lblTotalLocal" prefWidth="80"/>
+    </HBox>
+
+    <HBox spacing="15" alignment="CENTER_LEFT">
+        <CheckBox fx:id="chkPagado" text="Pagado"/>
+        <CheckBox fx:id="chkEntregado" text="Entregado"/>
+        <Label fx:id="lblEstado" style="-fx-font-weight: bold;"/>
+    </HBox>
+
+    <HBox spacing="15" alignment="CENTER_RIGHT">
+        <Button fx:id="btnGuardar" text="Guardar Pedido" minWidth="100"/>
+        <Button fx:id="btnCancelar" text="Cancelar" minWidth="100"/>
+    </HBox>
+
+</VBox>

@@ -1,20 +1,23 @@
 package com.mycompany.pay.orders;
 
-import com.mycompany.pay.orders.controller.UsuarioController;
-import com.mycompany.pay.orders.dao.UsuarioDAO;
-import com.mycompany.pay.orders.dao.UsuarioDAOImpl;
-import com.mycompany.pay.orders.dao.DBConnection;
-import com.mycompany.pay.orders.model.Rol;
-import com.mycompany.pay.orders.model.Usuario;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.util.List;
+public class PayOrders extends Application {
 
-public class PayOrders {
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        Parent root = FXMLLoader.load(getClass().getResource("/com/mycompany/pay/orders/view/LoginView.fxml"));
+        Scene scene = new Scene(root);
+        primaryStage.setTitle("Inicio de Sesión - Sistema de Pedidos");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
 
     public static void main(String[] args) {
-       
+        launch(args);
     }
 }
