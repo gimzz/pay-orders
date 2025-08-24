@@ -21,53 +21,51 @@ public class MovimientoMateriaPrimaFormController {
     @FXML private TextArea txtMotivo;
     @FXML private Label lblMensaje;
 
-private MateriaPrimaDAO materiaPrimaDAO;
-private MovimientoMateriaPrimaDAO movimientoMateriaPrimaDAO;
-
+    private MateriaPrimaDAO materiaPrimaDAO;
+    private MovimientoMateriaPrimaDAO movimientoMateriaPrimaDAO;
 
     private boolean guardado = false;
-public void setDAOs(MateriaPrimaDAO materiaPrimaDAO, MovimientoMateriaPrimaDAO movimientoMateriaPrimaDAO) {
-    this.materiaPrimaDAO = materiaPrimaDAO;
-    this.movimientoMateriaPrimaDAO = movimientoMateriaPrimaDAO;
-    cargarMateriasPrimas();
-}
 
-
+    public void setDAOs(MateriaPrimaDAO materiaPrimaDAO, MovimientoMateriaPrimaDAO movimientoMateriaPrimaDAO) {
+        this.materiaPrimaDAO = materiaPrimaDAO;
+        this.movimientoMateriaPrimaDAO = movimientoMateriaPrimaDAO;
+        cargarMateriasPrimas();
+    }
 
     private void cargarMateriasPrimas() {
-    try {
-        List<MateriaPrima> lista = materiaPrimaDAO.obtenerTodasMateriasPrimas();
-        ObservableList<MateriaPrima> observableList = FXCollections.observableArrayList(lista);
-        comboMateriaPrima.setItems(observableList);
+        try {
+            List<MateriaPrima> lista = materiaPrimaDAO.obtenerTodasMateriasPrimas();
 
-        comboMateriaPrima.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) {
-                try {
-                    int stockActual = materiaPrimaDAO.obtenerStockActual(newVal.getId());
-                    lblStockActual.setText(String.valueOf(stockActual));
-                    lblMensaje.setText("");
-                } catch (Exception e) {
-                    lblMensaje.setText("Error obteniendo stock: " + e.getMessage());
-                    lblStockActual.setText("Error");
-                    e.printStackTrace();
-                }
+            for (MateriaPrima m : lista) {
+                int stock = materiaPrimaDAO.obtenerStockActual(m.getId());
+                m.setStockActual(stock);
+            }
+
+            ObservableList<MateriaPrima> observableList = FXCollections.observableArrayList(lista);
+            comboMateriaPrima.setItems(observableList);
+
+            if (!observableList.isEmpty()) {
+                comboMateriaPrima.getSelectionModel().selectFirst();
+                lblStockActual.setText(String.valueOf(comboMateriaPrima.getSelectionModel().getSelectedItem().getStockActual()));
             } else {
                 lblStockActual.setText("");
             }
-        });
 
-        if (!observableList.isEmpty()) {
-            comboMateriaPrima.getSelectionModel().selectFirst();
-        } else {
+            comboMateriaPrima.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal != null) {
+                    lblStockActual.setText(String.valueOf(newVal.getStockActual()));
+                    lblMensaje.setText("");
+                } else {
+                    lblStockActual.setText("");
+                }
+            });
+
+        } catch (Exception ex) {
+            lblMensaje.setText("Error cargando materias primas: " + ex.getMessage());
             lblStockActual.setText("");
+            ex.printStackTrace();
         }
-    } catch (Exception ex) {
-        lblMensaje.setText("Error cargando materias primas: " + ex.getMessage());
-        lblStockActual.setText("");
-        ex.printStackTrace();
     }
-}
-
 
     @FXML
     private void handleGuardar() {
@@ -113,7 +111,7 @@ public void setDAOs(MateriaPrimaDAO materiaPrimaDAO, MovimientoMateriaPrimaDAO m
             movimiento.setMotivo(motivo);
             movimiento.setFechaMovimiento(LocalDateTime.now());
 
-    movimientoMateriaPrimaDAO.agregarMovimiento(movimiento);
+            movimientoMateriaPrimaDAO.agregarMovimiento(movimiento);
             guardado = true;
             cerrarVentana();
 

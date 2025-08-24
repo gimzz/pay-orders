@@ -69,15 +69,12 @@ public class PedidoFormController {
     private ObservableList<DetallePedidoRow> detalles = FXCollections.observableArrayList();
     private Pedidos pedidoEnEdicion = null; // null si es nuevo pedido
 
-    // Referencia al controlador principal para recargar tabla pedidos
     private PedidosViewController pedidosViewController;
 
-    // Setter para la referencia del controlador principal
     public void setPedidosViewController(PedidosViewController controller) {
         this.pedidosViewController = controller;
     }
 
-    // Configuración de controladores usados en este formulario
     public void setControllers(
             PedidosController pedidosCtl,
             ProductosController productosCtl,
@@ -166,52 +163,56 @@ public class PedidoFormController {
         }
     }
 
-    public void cargarDatosDespuesDeSetController(Pedidos pedidoEditar) {
-        try {
-            cargarDatosIniciales(); // Reutiliza para cargar listas base
-            this.pedidoEnEdicion = pedidoEditar;
+public void cargarDatosDespuesDeSetController(Pedidos pedidoEditar) {
+    try {
+        cargarDatosIniciales(); 
+        this.pedidoEnEdicion = pedidoEditar;
 
-            comboCliente.getSelectionModel().select(
-                    clientesController.obtenerTodosLosClientes().stream()
-                            .filter(c -> c.getId() == pedidoEditar.getClienteId())
-                            .findFirst().orElse(null)
-            );
+        comboCliente.getSelectionModel().select(
+            clientesController.obtenerTodosLosClientes().stream()
+                .filter(c -> c.getId() == pedidoEditar.getClienteId())
+                .findFirst()
+                .orElse(null)
+        );
 
-            comboTasaCambio.getSelectionModel().select(
-                    tasaCambioController.obtenerTodasLasTasasCambio().stream()
-                            .filter(t -> t.getValor().equals(pedidoEditar.getTasaCambioAplicada()))
-                            .findFirst().orElse(null)
-            );
+        comboTasaCambio.getSelectionModel().select(
+            tasaCambioController.obtenerTodasLasTasasCambio().stream()
+                .filter(t -> t.getValor().equals(pedidoEditar.getTasaCambioAplicada()))
+                .findFirst()
+                .orElse(null)
+        );
 
-            actualizarTasaCambioComboVisual();
+        actualizarTasaCambioComboVisual();
 
-            chkEntregado.setSelected(pedidoEditar.isEntregado());
+        chkEntregado.setSelected(pedidoEditar.isEntregado());
 
-            List<DetallePedido> dets = pedidosController.obtenerDetallesDePedido(pedidoEditar.getId());
-            detalles.clear();
-            for (DetallePedido d : dets) {
-                DetallePedidoRow r = new DetallePedidoRow();
-                r.setProducto(productosController.obtenerProductoPorId(d.getIdProducto()));
-                r.setCantidad(d.getCantidad());
-                r.setPrecioUnitario(d.getPrecioUnitario());
-                r.setPrecio(d.getPrecioUnitario());
-                detalles.add(r);
-            }
-
-            String descripcionMetodoPago = pedidosController.getPedidosDAO().obtenerMetodoPago(pedidoEditar.getId());
-            if (descripcionMetodoPago != null && !descripcionMetodoPago.isBlank()) {
-                comboMetodoPago.getItems().stream()
-                        .filter(m -> descripcionMetodoPago.equals(m.getDescripcion()))
-                        .findFirst()
-                        .ifPresent(m -> comboMetodoPago.getSelectionModel().select(m));
-            }
-
-            actualizarTotales();
-        } catch (Exception e) {
-            lblMensaje.setText("Error cargando datos: " + e.getMessage());
-            e.printStackTrace();
+        List<DetallePedido> dets = pedidosController.obtenerDetallesDePedido(pedidoEditar.getId());
+        detalles.clear();
+        for (DetallePedido d : dets) {
+            DetallePedidoRow r = new DetallePedidoRow();
+            r.setProducto(productosController.obtenerProductoPorId(d.getIdProducto()));
+            r.setCantidad(d.getCantidad());
+            r.setPrecioUnitario(d.getPrecioUnitario());
+            r.setPrecio(d.getPrecioUnitario());
+            detalles.add(r);
         }
+
+        int idMetodoPago = pedidosController.getPedidosDAO().obtenerIdMetodoPago(pedidoEditar.getId());
+        if (idMetodoPago > 0) {
+            comboMetodoPago.getItems().stream()
+                .filter(m -> m.getId() == idMetodoPago)
+                .findFirst()
+                .ifPresent(m -> comboMetodoPago.getSelectionModel().select(m));
+        }
+
+        actualizarTotales();
+
+    } catch (Exception e) {
+        lblMensaje.setText("Error cargando datos: " + e.getMessage());
+        e.printStackTrace();
     }
+}
+
 
     private void actualizarTasaCambioComboVisual() {
         comboTasaCambio.setCellFactory(lv -> new ListCell<TasadeCambio>() {

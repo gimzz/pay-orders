@@ -6,6 +6,8 @@ import com.mycompany.pay.orders.dao.MovimientoMateriaPrimaDAO;
 import com.mycompany.pay.orders.dao.MovimientoMateriaPrimaDAOImpl;
 import com.mycompany.pay.orders.dao.ClientesDAO;
 import com.mycompany.pay.orders.dao.ClientesDAOImpl;
+import com.mycompany.pay.orders.dao.ProductosDAO;
+import com.mycompany.pay.orders.dao.ProductosDAOImpl;
 import com.mycompany.pay.orders.dao.UsuarioDAO;
 import com.mycompany.pay.orders.dao.UsuarioDAOImpl;
 import javafx.fxml.FXML;
@@ -21,6 +23,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import javafx.stage.Modality;
 
 public class MainController {
 
@@ -143,6 +146,36 @@ private void abrirPanelMateriaPrima() {
                     "No se pudo abrir la ventana de inicio de sesión.\nDetalles: " + e.getMessage());
         }
     }
+    
+    @FXML
+private void abrirVentanaProductos() {
+    try {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/ProductoView.fxml"));
+        Parent root = loader.load();
+
+        Connection connection = DriverManager.getConnection(
+                "jdbc:postgresql://localhost:5432/pay_orders_db",
+                "admin",
+                "admin123"
+        );
+
+        ProductosDAO productosDAO = new ProductosDAOImpl(connection);
+        com.mycompany.pay.orders.controller.ProductoViewController productoController = loader.getController();
+        productoController.setProductosDAO(productosDAO);
+
+        // Crear la ventana (stage)
+        Stage stage = new Stage();
+        stage.setTitle("Gestión de Productos");
+        stage.setScene(new Scene(root));
+        stage.initModality(Modality.APPLICATION_MODAL);  // Opcional: para que sea modal
+        stage.show();
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        mostrarAlertaError("Error al abrir ventana Productos", e.getMessage());
+    }
+}
+
 
     private void mostrarAlertaError(String titulo, String mensaje) {
         Alert alert = new Alert(AlertType.ERROR);

@@ -18,55 +18,58 @@ import java.util.List;
 
 public class MateriaPrimaController {
 
-    @FXML
-    private TableView<MateriaPrima> tablaMateriaPrima;
-    @FXML
-    private TableColumn<MateriaPrima, String> colNombre;
-    @FXML
-    private TableColumn<MateriaPrima, String> colDescripcion;
-    @FXML
-    private TableColumn<MateriaPrima, String> colUnidadMedida;
+    @FXML private TableView<MateriaPrima> tablaMateriaPrima;
+    @FXML private TableColumn<MateriaPrima, String> colNombre;
+    @FXML private TableColumn<MateriaPrima, String> colDescripcion;
+    @FXML private TableColumn<MateriaPrima, String> colUnidadMedida;
+    @FXML private TableColumn<MateriaPrima, Integer> colStockActual;
+    @FXML private TableColumn<MateriaPrima, Integer> colStockMinimo;
 
-    @FXML
-    private Button btnAgregar;
-    @FXML
-    private Button btnEditar;
-    @FXML
-    private Button btnEliminar;
+    @FXML private Button btnAgregar;
+    @FXML private Button btnEditar;
+    @FXML private Button btnEliminar;
+    @FXML private Label lblMensaje;
+    @FXML private Button btnRegistrarMovimiento;
+@FXML private Button btnVerHistorial;
 
-    @FXML
-    private Label lblMensaje;
-    @FXML
-    private Button btnRegistrarMovimiento;
     private ObservableList<MateriaPrima> listaMateriaPrima;
- private MateriaPrimaDAO materiaPrimaDAO;
-private MovimientoMateriaPrimaDAO movimientoMateriaPrimaDAO;
+    private MateriaPrimaDAO materiaPrimaDAO;
+    private MovimientoMateriaPrimaDAO movimientoMateriaPrimaDAO;
 
-public void setDAOs(MateriaPrimaDAO materiaPrimaDAO, MovimientoMateriaPrimaDAO movimientoMateriaPrimaDAO) {
-    this.materiaPrimaDAO = materiaPrimaDAO;
-    this.movimientoMateriaPrimaDAO = movimientoMateriaPrimaDAO;
-    cargarMateriasPrimas();
-}
-
+    public void setDAOs(MateriaPrimaDAO materiaPrimaDAO, MovimientoMateriaPrimaDAO movimientoMateriaPrimaDAO) {
+        this.materiaPrimaDAO = materiaPrimaDAO;
+        this.movimientoMateriaPrimaDAO = movimientoMateriaPrimaDAO;
+        cargarMateriasPrimas();
+    }
 
     @FXML
     private void initialize() {
         colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
         colDescripcion.setCellValueFactory(new PropertyValueFactory<>("descripcion"));
         colUnidadMedida.setCellValueFactory(new PropertyValueFactory<>("unidadMedida"));
+        colStockActual.setCellValueFactory(new PropertyValueFactory<>("stockActual"));
+        colStockMinimo.setCellValueFactory(new PropertyValueFactory<>("stockMinimo"));
 
         listaMateriaPrima = FXCollections.observableArrayList();
         tablaMateriaPrima.setItems(listaMateriaPrima);
-        btnRegistrarMovimiento.setOnAction(e -> abrirFormularioRegistrarMovimiento());
 
+        btnRegistrarMovimiento.setOnAction(e -> abrirFormularioRegistrarMovimiento());
         btnAgregar.setOnAction(e -> abrirFormularioAgregar());
         btnEditar.setOnAction(e -> abrirFormularioEditar());
         btnEliminar.setOnAction(e -> eliminarMateriaPrima());
+        btnVerHistorial.setOnAction(e -> abrirHistorialMovimientos());
+
     }
 
     private void cargarMateriasPrimas() {
         try {
             List<MateriaPrima> materias = materiaPrimaDAO.obtenerTodasMateriasPrimas();
+
+            for (MateriaPrima m : materias) {
+                int stock = materiaPrimaDAO.obtenerStockActual(m.getId());
+                m.setStockActual(stock);
+            }
+
             listaMateriaPrima.setAll(materias);
             lblMensaje.setText("");
         } catch (Exception e) {
@@ -75,32 +78,60 @@ public void setDAOs(MateriaPrimaDAO materiaPrimaDAO, MovimientoMateriaPrimaDAO m
         }
     }
 
-    private void abrirFormularioRegistrarMovimiento() {
+    
+    private void abrirHistorialMovimientos() {
+    MateriaPrima seleccionado = tablaMateriaPrima.getSelectionModel().getSelectedItem();
+    if (seleccionado == null) {
+        lblMensaje.setText("Seleccione una materia prima para ver su historial.");
+        return;
+    }
+
     try {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/MovimientoMateriaPrimaForm.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/HistorialMovimientosMateriaPrima.fxml"));
         Parent root = loader.load();
 
-        MovimientoMateriaPrimaFormController movimientoController = loader.getController();
-        movimientoController.setDAOs(materiaPrimaDAO, movimientoMateriaPrimaDAO);
+        HistorialMovimientosController controladorHistorial = loader.getController();
+        controladorHistorial.setMovimientoDAO(movimientoMateriaPrimaDAO);
+        controladorHistorial.setIdMateriaPrima(seleccionado.getId());
 
         Stage stage = new Stage();
         stage.setScene(new Scene(root));
-        stage.setTitle("Registrar Movimiento de Materia Prima");
+        stage.setTitle("Historial de Movimientos");
         stage.initModality(Modality.APPLICATION_MODAL);
-        stage.setMinWidth(400);
-        stage.setMinHeight(350);
+        stage.setMinWidth(600);
+        stage.setMinHeight(500);
 
         stage.showAndWait();
-
-        if (movimientoController.isGuardado()) {
-            cargarMateriasPrimas();
-        }
-    } catch (Exception e) {
-        e.printStackTrace();
-        lblMensaje.setText("Error al abrir formulario de movimiento: " + e.getMessage());
+    } catch (Exception ex) {
+        ex.printStackTrace();
+        lblMensaje.setText("Error al abrir historial: " + ex.getMessage());
     }
 }
+    private void abrirFormularioRegistrarMovimiento() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/MovimientoMateriaPrimaForm.fxml"));
+            Parent root = loader.load();
 
+            MovimientoMateriaPrimaFormController movimientoController = loader.getController();
+            movimientoController.setDAOs(materiaPrimaDAO, movimientoMateriaPrimaDAO);
+
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Registrar Movimiento de Materia Prima");
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setMinWidth(400);
+            stage.setMinHeight(350);
+
+            stage.showAndWait();
+
+            if (movimientoController.isGuardado()) {
+                cargarMateriasPrimas();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            lblMensaje.setText("Error al abrir formulario de movimiento: " + e.getMessage());
+        }
+    }
 
     private void abrirFormularioAgregar() {
         try {
@@ -109,6 +140,7 @@ public void setDAOs(MateriaPrimaDAO materiaPrimaDAO, MovimientoMateriaPrimaDAO m
 
             MateriaPrimaFormController formController = loader.getController();
             formController.setMateriaPrimaDAO(this.materiaPrimaDAO);
+            formController.setMovimientoMateriaPrimaDAO(this.movimientoMateriaPrimaDAO);
 
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
@@ -143,6 +175,7 @@ public void setDAOs(MateriaPrimaDAO materiaPrimaDAO, MovimientoMateriaPrimaDAO m
 
             MateriaPrimaFormController formController = loader.getController();
             formController.setMateriaPrimaDAO(materiaPrimaDAO);
+            formController.setMovimientoMateriaPrimaDAO(movimientoMateriaPrimaDAO);
             formController.cargarMateriaPrima(seleccionado);
 
             Stage stage = new Stage();
