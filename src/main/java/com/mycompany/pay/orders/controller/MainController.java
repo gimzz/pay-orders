@@ -10,20 +10,17 @@ import com.mycompany.pay.orders.dao.ProductosDAO;
 import com.mycompany.pay.orders.dao.ProductosDAOImpl;
 import com.mycompany.pay.orders.dao.UsuarioDAO;
 import com.mycompany.pay.orders.dao.UsuarioDAOImpl;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import javafx.stage.Modality;
 
 public class MainController {
 
@@ -50,10 +47,7 @@ public class MainController {
             Parent vista = loader.load();
 
             Connection connection = DriverManager.getConnection(
-                    "jdbc:postgresql://localhost:5432/pay_orders_db",
-                    "admin",
-                    "admin123"
-            );
+                "jdbc:postgresql://localhost:5432/pay_orders_db", "admin", "admin123");
 
             ClientesDAO clientesDAO = new ClientesDAOImpl(connection);
             ClientesController clientesController = new ClientesController(clientesDAO);
@@ -69,32 +63,52 @@ public class MainController {
             mostrarAlertaError("Error al cargar vista Pedidos", e.getMessage());
         }
     }
-@FXML
-private void abrirPanelMateriaPrima() {
-    try {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/MateriaPrima.fxml"));
-        Parent vista = loader.load();
 
-        Connection connection = DriverManager.getConnection(
-                "jdbc:postgresql://localhost:5432/pay_orders_db",
-                "admin",
-                "admin123"
-        );
+    @FXML
+    private void abrirPanelMateriaPrima() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/MateriaPrima.fxml"));
+            Parent vista = loader.load();
 
-        MateriaPrimaDAO materiaPrimaDAO = new MateriaPrimaDAOImpl(connection);
-        MovimientoMateriaPrimaDAO movimientoMateriaPrimaDAO = new MovimientoMateriaPrimaDAOImpl(connection);
+            Connection connection = DriverManager.getConnection(
+                "jdbc:postgresql://localhost:5432/pay_orders_db", "admin", "admin123");
 
-        MateriaPrimaController materiaPrimaController = loader.getController();
-        materiaPrimaController.setDAOs(materiaPrimaDAO, movimientoMateriaPrimaDAO);
+            MateriaPrimaDAO materiaPrimaDAO = new MateriaPrimaDAOImpl(connection);
+            MovimientoMateriaPrimaDAO movimientoMateriaPrimaDAO = new MovimientoMateriaPrimaDAOImpl(connection);
 
-        panelContenido.getChildren().clear();
-        panelContenido.getChildren().add(vista);
+            MateriaPrimaController materiaPrimaController = loader.getController();
+            materiaPrimaController.setDAOs(materiaPrimaDAO, movimientoMateriaPrimaDAO);
 
-    } catch (Exception e) {
-        e.printStackTrace();
-        mostrarAlertaError("Error al cargar vista Materia Prima", e.getMessage());
+            panelContenido.getChildren().clear();
+            panelContenido.getChildren().add(vista);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            mostrarAlertaError("Error al cargar vista Materia Prima", e.getMessage());
+        }
     }
-}
+
+    @FXML
+    private void abrirPanelProductos() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/ProductoView.fxml"));
+            Parent vista = loader.load();
+
+            Connection connection = DriverManager.getConnection(
+                "jdbc:postgresql://localhost:5432/pay_orders_db", "admin", "admin123");
+
+            ProductosDAO productosDAO = new ProductosDAOImpl(connection);
+            ProductoViewController productoViewController = loader.getController();
+            productoViewController.setProductosDAO(productosDAO);
+
+            panelContenido.getChildren().clear();
+            panelContenido.getChildren().add(vista);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            mostrarAlertaError("Error al cargar vista Productos", e.getMessage());
+        }
+    }
 
     private void cargarVistaEnPanel(String rutaFXML) {
         try {
@@ -104,34 +118,28 @@ private void abrirPanelMateriaPrima() {
             if (controller instanceof UsuarioController) {
                 UsuarioController usuarioController = (UsuarioController) controller;
                 Connection connection = DriverManager.getConnection(
-                        "jdbc:postgresql://localhost:5432/pay_orders_db",
-                        "admin",
-                        "admin123"
-                );
+                    "jdbc:postgresql://localhost:5432/pay_orders_db", "admin", "admin123");
                 UsuarioDAO usuarioDAO = new UsuarioDAOImpl(connection);
                 usuarioController.setUsuarioDAO(usuarioDAO);
             }
             panelContenido.getChildren().clear();
             panelContenido.getChildren().add(vista);
-        } catch (IOException e) {
-            e.printStackTrace();
-            mostrarAlertaError("Error al cargar vista", "No se pudo cargar la vista: " + rutaFXML + "\nDetalles: " + e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            mostrarAlertaError("Error inesperado", "Ocurrió un error inesperado:\n" + e.getMessage());
+            mostrarAlertaError("Error al cargar vista", "No se pudo cargar la vista: " + rutaFXML + "\nDetalles: " + e.getMessage());
         }
     }
 
     @FXML
     private void handleCerrarSesion() {
         try {
-            Stage stagePrincipal = (Stage) btnCerrarSesion.getScene().getWindow();
+            javafx.stage.Stage stagePrincipal = (javafx.stage.Stage) btnCerrarSesion.getScene().getWindow();
             stagePrincipal.close();
 
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/LoginView.fxml"));
             Parent root = loader.load();
-            Stage loginStage = new Stage();
-            loginStage.setScene(new Scene(root));
+            javafx.stage.Stage loginStage = new javafx.stage.Stage();
+            loginStage.setScene(new javafx.scene.Scene(root));
             loginStage.setTitle("Inicio de Sesión - Sistema de Pedidos");
             loginStage.setWidth(700);
             loginStage.setHeight(400);
@@ -140,42 +148,12 @@ private void abrirPanelMateriaPrima() {
             loginStage.show();
             loginStage.sizeToScene();
             loginStage.centerOnScreen();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             mostrarAlertaError("Error al cerrar sesión",
-                    "No se pudo abrir la ventana de inicio de sesión.\nDetalles: " + e.getMessage());
+                "No se pudo abrir la ventana de inicio de sesión.\nDetalles: " + e.getMessage());
         }
     }
-    
-    @FXML
-private void abrirVentanaProductos() {
-    try {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/ProductoView.fxml"));
-        Parent root = loader.load();
-
-        Connection connection = DriverManager.getConnection(
-                "jdbc:postgresql://localhost:5432/pay_orders_db",
-                "admin",
-                "admin123"
-        );
-
-        ProductosDAO productosDAO = new ProductosDAOImpl(connection);
-        com.mycompany.pay.orders.controller.ProductoViewController productoController = loader.getController();
-        productoController.setProductosDAO(productosDAO);
-
-        // Crear la ventana (stage)
-        Stage stage = new Stage();
-        stage.setTitle("Gestión de Productos");
-        stage.setScene(new Scene(root));
-        stage.initModality(Modality.APPLICATION_MODAL);  // Opcional: para que sea modal
-        stage.show();
-
-    } catch (Exception e) {
-        e.printStackTrace();
-        mostrarAlertaError("Error al abrir ventana Productos", e.getMessage());
-    }
-}
-
 
     private void mostrarAlertaError(String titulo, String mensaje) {
         Alert alert = new Alert(AlertType.ERROR);

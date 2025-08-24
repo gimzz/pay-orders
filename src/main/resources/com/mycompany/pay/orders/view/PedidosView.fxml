@@ -29,6 +29,8 @@
         <Button text="Editar Pedido" onAction="#abrirFormularioEditarPedido"/>
         <Button text="Eliminar Pedido" onAction="#eliminarPedido"/>
         <Button text="Actualizar Estado Entrega" onAction="#actualizarEstadoEntrega"/>
+        <Button text="Actualizar Estado Pago" onAction="#actualizarEstadoPagoSeleccionado"/>
+
         <Button text="Ver Productos del Cliente" onAction="#mostrarProductosCliente"/>
     </HBox>
     <Label fx:id="lblMensaje" style="-fx-text-fill: red;" />

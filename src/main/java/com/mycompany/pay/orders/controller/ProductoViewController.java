@@ -5,10 +5,14 @@ import com.mycompany.pay.orders.model.Productos;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-
-import java.math.BigDecimal;
+import javafx.scene.layout.VBox;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import javafx.stage.Modality;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -17,15 +21,16 @@ public class ProductoViewController {
     @FXML private TableView<Productos> tablaProductos;
     @FXML private TableColumn<Productos, Integer> colId;
     @FXML private TableColumn<Productos, String> colNombre;
-    @FXML private TableColumn<Productos, BigDecimal> colPrecioUsd;
-    @FXML private TextField txtNombre;
-    @FXML private TextField txtPrecioUsd;
-    @FXML private Button btnAgregar;
-    @FXML private Button btnEliminar;
+    @FXML private TableColumn<Productos, java.math.BigDecimal> colPrecioUsd;
+
     @FXML private Label lblMensaje;
 
+    @FXML private VBox formularioContainer;
+
     private ProductosDAO productosDAO;
-    private ObservableList<Productos> productosObservable;
+    private ObservableList<Productos> listaProductos;
+
+    private ProductoFormController formController;
 
     public void setProductosDAO(ProductosDAO dao) {
         this.productosDAO = dao;
@@ -38,81 +43,69 @@ public class ProductoViewController {
         colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
         colPrecioUsd.setCellValueFactory(new PropertyValueFactory<>("precioUsd"));
 
-        btnAgregar.setOnAction(e -> agregarProducto());
-        btnEliminar.setOnAction(e -> eliminarProducto());
-
-        tablaProductos.getSelectionModel().selectedItemProperty().addListener(
-            (obs, oldSelection, newSelection) -> {
-                if (newSelection != null) {
-                    txtNombre.setText(newSelection.getNombre());
-                    txtPrecioUsd.setText(newSelection.getPrecioUsd().toString());
-                }
-            }
-        );
+        formularioContainer.getChildren().clear();
     }
 
     private void cargarProductos() {
         try {
             List<Productos> lista = productosDAO.obtenerTodosLosProductos();
-            productosObservable = FXCollections.observableArrayList(lista);
-            tablaProductos.setItems(productosObservable);
-            lblMensaje.setText("");
+            listaProductos = FXCollections.observableArrayList(lista);
+            tablaProductos.setItems(listaProductos);
         } catch (SQLException e) {
-            lblMensaje.setText("Error al cargar productos: " + e.getMessage());
+            lblMensaje.setText("Error cargando productos: " + e.getMessage());
         }
     }
 
-    private void agregarProducto() {
-        String nombre = txtNombre.getText().trim();
-        String precioStr = txtPrecioUsd.getText().trim();
+    @FXML
+    private void mostrarFormularioNuevo() {
+        mostrarFormulario(null);
+    }
 
-        if (nombre.isEmpty()) {
-            lblMensaje.setText("Debe ingresar nombre del producto.");
+    @FXML
+    private void mostrarFormularioEditar() {
+        Productos seleccionado = tablaProductos.getSelectionModel().getSelectedItem();
+        if (seleccionado == null) {
+            lblMensaje.setText("Seleccione un producto para editar");
             return;
         }
-        BigDecimal precio;
-        try {
-            precio = new BigDecimal(precioStr);
-        } catch (NumberFormatException e) {
-            lblMensaje.setText("Precio USD inválido.");
-            return;
-        }
+        mostrarFormulario(seleccionado);
+    }
 
-        Productos producto = new Productos();
-        producto.setNombre(nombre);
-        producto.setPrecioUsd(precio);
-        producto.setActivo(true);
-        producto.setStockActual(0);
-        producto.setStockMinimo(0);
-
+    private void mostrarFormulario(Productos producto) {
         try {
-            productosDAO.agregarProducto(producto);
-            lblMensaje.setText("Producto agregado correctamente.");
-            cargarProductos();
-            limpiarCampos();
-        } catch (SQLException e) {
-            lblMensaje.setText("Error al agregar producto: " + e.getMessage());
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/ProductoFormView.fxml"));
+            Parent formRoot = loader.load();
+
+            formController = loader.getController();
+            formController.setProductosDAO(productosDAO);
+            formController.setProducto(producto);
+            formController.setOnCloseCallback(() -> {
+                formularioContainer.getChildren().clear();
+                cargarProductos();
+            });
+
+            formularioContainer.getChildren().clear();
+            formularioContainer.getChildren().add(formRoot);
+
+        } catch (Exception e) {
+            lblMensaje.setText("Error cargando formulario: " + e.getMessage());
         }
     }
 
+    @FXML
     private void eliminarProducto() {
         Productos seleccionado = tablaProductos.getSelectionModel().getSelectedItem();
         if (seleccionado == null) {
-            lblMensaje.setText("Seleccione un producto para eliminar.");
+            lblMensaje.setText("Seleccione un producto para eliminar");
             return;
         }
         try {
             productosDAO.eliminarProducto(seleccionado.getId());
-            lblMensaje.setText("Producto eliminado.");
+            lblMensaje.setText("Producto eliminado correctamente");
             cargarProductos();
-            limpiarCampos();
+            formularioContainer.getChildren().clear();
         } catch (SQLException e) {
-            lblMensaje.setText("Error al eliminar producto: " + e.getMessage());
+            lblMensaje.setText("Error eliminando producto: " + e.getMessage());
         }
-    }
-
-    private void limpiarCampos() {
-        txtNombre.clear();
-        txtPrecioUsd.clear();
     }
 }
