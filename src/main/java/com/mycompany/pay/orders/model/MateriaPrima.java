@@ -20,11 +20,9 @@ public class MateriaPrima {
         this.stockMinimo = stockMinimo;
     }
 
-    
-    
     @Override
 public String toString() {
-    return this.getNombre();  // o cualquier propiedad que identifique claramente
+    return this.getNombre();  
 }
     public int getId() {
         return id;
