@@ -36,6 +36,19 @@ public class PedidosDAOImpl implements PedidosDAO {
             }
         }
     }
+@Override
+public int obtenerIdMetodoPago(int idPedido) throws SQLException {
+    String sql = "SELECT id_metodo_pago FROM system.pagos_pedido WHERE id_pedido = ? ORDER BY fecha_pago DESC LIMIT 1";
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, idPedido);
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("id_metodo_pago");
+            }
+        }
+    }
+    return 0; // Si no tiene ningún método de pago registrado
+}
 
     @Override
     public Pedidos obtenerPedidoPorId(int id) throws SQLException {

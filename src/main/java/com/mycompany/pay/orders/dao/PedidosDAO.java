@@ -18,4 +18,5 @@ public interface PedidosDAO {
     String obtenerMetodoPago(int pedidoId) throws SQLException;
     boolean obtenerPagadoPorPedido(int pedidoId) throws SQLException;
     void actualizarPagado(int pedidoId, boolean pagado) throws SQLException;
+    int obtenerIdMetodoPago(int idPedido) throws SQLException;
 }

@@ -99,23 +99,28 @@ public int obtenerStockActual(int idMateriaPrima) throws SQLException {
     }
 }
 
-    @Override
-    public void eliminarMateriaPrima(int id) throws SQLException {
-        String sql = "DELETE FROM system.materia_prima WHERE id=?";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            ps.executeUpdate();
-        }
-    }
 
-    private MateriaPrima mapearMateriaPrima(ResultSet rs) throws SQLException {
-        MateriaPrima m = new MateriaPrima();
-        m.setId(rs.getInt("id"));
-        m.setNombre(rs.getString("nombre"));
-        m.setDescripcion(rs.getString("descripcion"));
-        m.setUnidadMedida(rs.getString("unidad_medida"));
-        m.setStockActual(rs.getInt("stock_actual"));
-        m.setStockMinimo(rs.getInt("stock_minimo"));
-        return m;
+   public void eliminarMateriaPrima(int id) throws SQLException {
+    String sqlMovimientos = "DELETE FROM system.movimientos_materia_prima WHERE id_materia_prima = ?";
+    try (PreparedStatement ps = connection.prepareStatement(sqlMovimientos)) {
+        ps.setInt(1, id);
+        ps.executeUpdate();
     }
+    String sqlMateriaPrima = "DELETE FROM system.materia_prima WHERE id = ?";
+    try (PreparedStatement ps = connection.prepareStatement(sqlMateriaPrima)) {
+        ps.setInt(1, id);
+        ps.executeUpdate();
+    }
+}
+
+   private MateriaPrima mapearMateriaPrima(ResultSet rs) throws SQLException {
+    MateriaPrima m = new MateriaPrima();
+    m.setId(rs.getInt("id"));
+    m.setNombre(rs.getString("nombre"));
+    m.setDescripcion(rs.getString("descripcion"));
+    m.setUnidadMedida(rs.getString("unidad_medida"));
+    m.setStockActual(rs.getInt("stock_actual"));
+    m.setStockMinimo(rs.getInt("stock_minimo")); 
+        return m;
+}
 }
