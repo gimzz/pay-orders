@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mycompany.pay.orders.controller.TasaCambioFormController"
+      spacing="10">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label text="Gestión de Tasas de Cambio" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+    <TableView fx:id="tablaTasas" prefHeight="300" prefWidth="600">
+        <columns>
+            <TableColumn fx:id="colFecha" text="Fecha" prefWidth="150"/>
+            <TableColumn fx:id="colMonedaOrigen" text="Moneda Origen" prefWidth="150"/>
+            <TableColumn fx:id="colMonedaDestino" text="Moneda Destino" prefWidth="150"/>
+            <TableColumn fx:id="colValor" text="Valor" prefWidth="150"/>
+        </columns>
+    </TableView>
+
+    <GridPane hgap="10" vgap="10">
+        <Label text="Fecha:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <DatePicker fx:id="datePickerFecha" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+        <Label text="Moneda Origen:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtMonedaOrigen" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+        <Label text="Moneda Destino:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtMonedaDestino" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+        <Label text="Valor:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtValor" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+    </GridPane>
+
+    <HBox spacing="15" alignment="CENTER_RIGHT">
+        <padding>
+            <Insets top="10" right="0" bottom="0" left="0"/>
+        </padding>
+        <Button text="Agregar" onAction="#handleAgregarTasa"/>
+        <Button text="Eliminar Seleccionado" onAction="#handleEliminarTasa"/>
+        <Button text="Cerrar" onAction="#handleCerrar"/>
+    </HBox>
+</VBox>

@@ -1,7 +1,7 @@
 /home/gimz/proyectos/pay-orders/pay-orders/src/main/java/com/mycompany/pay/orders/controller/PedidosController.java
 /home/gimz/proyectos/pay-orders/pay-orders/src/main/java/com/mycompany/pay/orders/model/Usuario.java
-/home/gimz/proyectos/pay-orders/pay-orders/src/main/java/com/mycompany/pay/orders/controller/MateriaPrimaController.java
 /home/gimz/proyectos/pay-orders/pay-orders/src/main/java/com/mycompany/pay/orders/controller/UsuarioController.java
+/home/gimz/proyectos/pay-orders/pay-orders/src/main/java/com/mycompany/pay/orders/controller/MateriaPrimaController.java
 /home/gimz/proyectos/pay-orders/pay-orders/src/main/java/com/mycompany/pay/orders/dao/MetodosdePagoDAO.java
 /home/gimz/proyectos/pay-orders/pay-orders/src/main/java/com/mycompany/pay/orders/controller/TasadeCambioController.java
 /home/gimz/proyectos/pay-orders/pay-orders/src/main/java/com/mycompany/pay/orders/controller/MainController.java
@@ -30,6 +30,7 @@
 /home/gimz/proyectos/pay-orders/pay-orders/src/main/java/com/mycompany/pay/orders/dao/PagosPedidoImpl.java
 /home/gimz/proyectos/pay-orders/pay-orders/src/main/java/com/mycompany/pay/orders/dao/PedidosDAO.java
 /home/gimz/proyectos/pay-orders/pay-orders/src/main/java/com/mycompany/pay/orders/dao/PedidosDAOImpl.java
+/home/gimz/proyectos/pay-orders/pay-orders/src/main/java/com/mycompany/pay/orders/controller/ClientesFormController.java
 /home/gimz/proyectos/pay-orders/pay-orders/src/main/java/com/mycompany/pay/orders/controller/ProductosController.java
 /home/gimz/proyectos/pay-orders/pay-orders/src/main/java/com/mycompany/pay/orders/dao/TasadeCambioDAOImpl.java
 /home/gimz/proyectos/pay-orders/pay-orders/src/main/java/com/mycompany/pay/orders/controller/ProductoViewController.java
@@ -54,8 +55,9 @@
 /home/gimz/proyectos/pay-orders/pay-orders/src/main/java/com/mycompany/pay/orders/controller/PagosPedidoController.java
 /home/gimz/proyectos/pay-orders/pay-orders/src/main/java/com/mycompany/pay/orders/model/TasadeCambio.java
 /home/gimz/proyectos/pay-orders/pay-orders/src/main/java/com/mycompany/pay/orders/controller/RegistroController.java
-/home/gimz/proyectos/pay-orders/pay-orders/src/main/java/com/mycompany/pay/orders/dao/MateriaPrimaDAOImpl.java
 /home/gimz/proyectos/pay-orders/pay-orders/src/main/java/com/mycompany/pay/orders/dao/MovimientoMateriaPrimaDAOImpl.java
+/home/gimz/proyectos/pay-orders/pay-orders/src/main/java/com/mycompany/pay/orders/dao/MateriaPrimaDAOImpl.java
 /home/gimz/proyectos/pay-orders/pay-orders/src/main/java/com/mycompany/pay/orders/dao/ProductosDAO.java
 /home/gimz/proyectos/pay-orders/pay-orders/src/main/java/com/mycompany/pay/orders/model/MovimientoInventario.java
 /home/gimz/proyectos/pay-orders/pay-orders/src/main/java/com/mycompany/pay/orders/controller/MovimientoMateriaPrimaFormController.java
+/home/gimz/proyectos/pay-orders/pay-orders/src/main/java/com/mycompany/pay/orders/controller/TasaCambioFormController.java
