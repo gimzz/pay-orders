@@ -5,7 +5,6 @@ import com.mycompany.pay.orders.model.Productos;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 
@@ -43,10 +42,12 @@ public class ProductoFormController {
     private void guardar() {
         String nombre = txtNombre.getText().trim();
         String precioStr = txtPrecioUsd.getText().trim();
+
         if (nombre.isEmpty()) {
             lblMensaje.setText("El nombre es obligatorio");
             return;
         }
+
         BigDecimal precio;
         try {
             precio = new BigDecimal(precioStr);
@@ -67,15 +68,14 @@ public class ProductoFormController {
             } else {
                 productosDAO.actualizarProducto(producto);
             }
-            if(onCloseCallback != null) onCloseCallback.run();
-
-        } catch(SQLException e) {
+            if (onCloseCallback != null) onCloseCallback.run(); 
+        } catch (SQLException e) {
             lblMensaje.setText("Error al guardar: " + e.getMessage());
         }
     }
 
     @FXML
     private void cancelar() {
-        if(onCloseCallback != null) onCloseCallback.run();
+        if (onCloseCallback != null) onCloseCallback.run(); 
     }
 }

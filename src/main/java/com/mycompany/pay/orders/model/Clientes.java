@@ -1,15 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.pay.orders.model;
 
 import java.time.LocalDateTime;
 
-/**
- *
- * @author gimz
- */
 public class Clientes {
 
     private int id;
@@ -35,11 +27,6 @@ public class Clientes {
         return id;
     }
 
-    @Override
-    public String toString() {
-        return nombre + " " + apellido;
-    }
-
     public void setId(int id) {
         this.id = id;
     }
@@ -52,7 +39,6 @@ public class Clientes {
         if (cedula <= 0) {
             throw new IllegalArgumentException("La cedula debe ser mayor a cero (0)");
         }
-
         this.cedula = cedula;
     }
 
@@ -102,5 +88,18 @@ public class Clientes {
         }
         this.fechaRegistro = fechaRegistro;
     }
+
+  @Override
+public String toString() {
+    String nombreCompleto = "";
+    if (nombre != null) nombreCompleto += nombre;
+    if (apellido != null && !apellido.isEmpty()) {
+        if (!nombreCompleto.isEmpty()) {
+            nombreCompleto += " ";
+        }
+        nombreCompleto += apellido;
+    }
+    return nombreCompleto.isEmpty() ? "" : nombreCompleto;
+}
 
 }

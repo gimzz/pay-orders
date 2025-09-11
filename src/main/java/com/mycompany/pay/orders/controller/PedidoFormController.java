@@ -67,7 +67,7 @@ public class PedidoFormController {
     private PagosPedidoController pagosPedidoController;
 
     private ObservableList<DetallePedidoRow> detalles = FXCollections.observableArrayList();
-    private Pedidos pedidoEnEdicion = null; // null si es nuevo pedido
+    private Pedidos pedidoEnEdicion = null; 
 
     private PedidosViewController pedidosViewController;
 
@@ -140,8 +140,8 @@ public class PedidoFormController {
 
     public void cargarDatosIniciales() {
         try {
-            List<Clientes> clientes = clientesController.obtenerTodosLosClientes();
-            comboCliente.setItems(FXCollections.observableArrayList(clientes));
+             List<Clientes> clientes = clientesController.obtenerTodosLosClientes();
+        comboCliente.setItems(FXCollections.observableArrayList(clientes));
             List<TasadeCambio> tasas = tasaCambioController.obtenerTodasLasTasasCambio();
             comboTasaCambio.setItems(FXCollections.observableArrayList(tasas));
             if (!tasas.isEmpty()) {
@@ -300,42 +300,39 @@ public void cargarDatosDespuesDeSetController(Pedidos pedidoEditar) {
                         : (pagado ? "Pagado, falta entregar" : "Entregado, falta pagar");
         lblEstado.setText(texto);
     }
+    
+@FXML
+private void abrirFormularioNuevoCliente() {
+    try {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/ClienteForm.fxml"));
+        Parent root = loader.load();
+        ClienteFormController formController = loader.getController();
+        Stage stage = new Stage();
+        stage.setScene(new Scene(root));
+        stage.setTitle("Nuevo Cliente");
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setWidth(450);
+        stage.setHeight(350);
+        stage.setMinWidth(400);
+        stage.setMinHeight(300);
+        stage.showAndWait();
 
-    @FXML
-    private void abrirFormularioNuevoCliente() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/ClienteForm.fxml"));
-            Parent root = loader.load();
-
-            ClienteFormController formController = loader.getController();
-
-            formController.setClientesController(this.clientesController);
-
-            Stage stage = new Stage();
-            stage.setScene(new Scene(root));
-            stage.setTitle("Nuevo Cliente");
-            stage.initModality(Modality.APPLICATION_MODAL);
-
-            stage.setWidth(450);
-            stage.setHeight(350);
-            stage.setMinWidth(400);
-            stage.setMinHeight(300);
-
-            stage.showAndWait();
-
-            // Si el cliente fue guardado, actualiza el combo de clientes
-            if (formController.isGuardado()) {
-                Clientes clienteNuevo = formController.getClienteGuardado();
-                if (clienteNuevo != null) {
-                    comboCliente.getItems().add(clienteNuevo);
-                    comboCliente.setValue(clienteNuevo);
-                }
+        if (formController.isGuardado()) {
+            String nombreNuevo = formController.getNombreGuardado();
+            if (nombreNuevo != null && !nombreNuevo.isEmpty()) {
+                Clientes clienteNuevo = new Clientes();
+                clienteNuevo.setNombre(nombreNuevo);
+                comboCliente.getItems().add(clienteNuevo);
+                comboCliente.setValue(clienteNuevo);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            lblMensaje.setText("Error al abrir formulario de nuevo cliente.");
         }
+    } catch (IOException e) {
+        e.printStackTrace();
+        lblMensaje.setText("Error al abrir formulario de nuevo cliente.");
     }
+}
+
+
 
     @FXML
     private void guardarPedido(ActionEvent event) {

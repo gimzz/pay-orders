@@ -10,9 +10,6 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-import javafx.stage.Modality;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -24,12 +21,10 @@ public class ProductoViewController {
     @FXML private TableColumn<Productos, java.math.BigDecimal> colPrecioUsd;
 
     @FXML private Label lblMensaje;
-
     @FXML private VBox formularioContainer;
 
     private ProductosDAO productosDAO;
     private ObservableList<Productos> listaProductos;
-
     private ProductoFormController formController;
 
     public void setProductosDAO(ProductosDAO dao) {
@@ -80,8 +75,8 @@ public class ProductoViewController {
             formController.setProductosDAO(productosDAO);
             formController.setProducto(producto);
             formController.setOnCloseCallback(() -> {
-                formularioContainer.getChildren().clear();
-                cargarProductos();
+                formularioContainer.getChildren().clear(); 
+                cargarProductos();                          
             });
 
             formularioContainer.getChildren().clear();
@@ -102,8 +97,8 @@ public class ProductoViewController {
         try {
             productosDAO.eliminarProducto(seleccionado.getId());
             lblMensaje.setText("Producto eliminado correctamente");
-            cargarProductos();
-            formularioContainer.getChildren().clear();
+            formularioContainer.getChildren().clear(); 
+            cargarProductos();                        
         } catch (SQLException e) {
             lblMensaje.setText("Error eliminando producto: " + e.getMessage());
         }

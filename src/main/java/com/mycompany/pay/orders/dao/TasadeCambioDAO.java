@@ -10,4 +10,6 @@ public interface TasadeCambioDAO {
     TasadeCambio obtenerTasaCambioPorFecha(LocalDate fecha) throws SQLException;
     TasadeCambio obtenerUltimaTasaCambio() throws SQLException;
     List<TasadeCambio> obtenerTodasLasTasasCambio() throws SQLException;
+    void eliminarTasaCambio(int id) throws SQLException;
+
 }

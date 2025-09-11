@@ -1,4 +1,3 @@
-
 package com.mycompany.pay.orders.controller;
 
 import java.math.BigDecimal;
@@ -21,19 +20,23 @@ public class TasadeCambioController {
         this.tasaCambioDAO = tasaCambioDAO;
     }
 
-    public void registrarTasaCambio(TasadeCambio tasa) throws SQLException {
-        if (tasa == null)
-            throw new IllegalArgumentException("El objeto tasa no puede ser null");
-        if (tasa.getFechaTasaCambio() == null)
-            throw new IllegalArgumentException("La fecha de la tasa es obligatoria");
-        if (tasa.getMonedaOrigen() == null || tasa.getMonedaOrigen().isBlank())
-            throw new IllegalArgumentException("Moneda origen es obligatoria");
-        if (tasa.getMonedaDestino() == null || tasa.getMonedaDestino().isBlank())
-            throw new IllegalArgumentException("Moneda destino es obligatoria");
-        if (tasa.getValor() == null || tasa.getValor().compareTo(BigDecimal.ZERO) <= 0)
-            throw new IllegalArgumentException("Valor debe ser mayor que cero");
+  public void registrarTasaCambio(TasadeCambio tasa) throws SQLException {
+    if (tasa == null)
+        throw new IllegalArgumentException("El objeto tasa no puede ser null");
+    if (tasa.getFechaTasaCambio() == null)
+        throw new IllegalArgumentException("La fecha de la tasa es obligatoria");
+    if (tasa.getValor() == null || tasa.getValor().compareTo(BigDecimal.ZERO) <= 0)
+        throw new IllegalArgumentException("Valor debe ser mayor que cero");
 
-        tasaCambioDAO.registrarTasaCambio(tasa);
+    tasaCambioDAO.registrarTasaCambio(tasa);
+}
+
+
+    public void eliminarTasaCambio(int id) throws SQLException {
+        if (id <= 0) {
+            throw new IllegalArgumentException("ID de tasa inválido para eliminar");
+        }
+        tasaCambioDAO.eliminarTasaCambio(id);
     }
 
     public TasadeCambio obtenerTasaCambioPorFecha(LocalDate fecha) throws SQLException {

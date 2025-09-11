@@ -69,6 +69,16 @@ public class TasadeCambioDAOImpl implements TasadeCambioDAO {
             }
         }
     }
+public void eliminarTasaCambio(int id) throws SQLException {
+    String sql = "DELETE FROM system.tasa_cambio WHERE id = ?";
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, id);
+        int filasEliminadas = ps.executeUpdate();
+        if (filasEliminadas == 0) {
+            throw new SQLException("No se pudo eliminar la tasa de cambio con ID " + id);
+        }
+    }
+}
 
     @Override
     public List<TasadeCambio> obtenerTodasLasTasasCambio() throws SQLException {

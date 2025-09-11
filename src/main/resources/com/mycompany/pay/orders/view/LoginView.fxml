@@ -21,7 +21,6 @@
                 <PasswordField fx:id="txtPassword" promptText="Contraseña" prefWidth="250" />
                 <Label fx:id="lblMessage" style="-fx-text-fill: red;" />
                 <Button fx:id="btnLogin" text="Iniciar Sesión" onAction="#handleLogin" prefWidth="250" />
-                <Button text="Registrar un nuevo usuario" onAction="#abrirRegistro" prefWidth="250" />
             </children>
         </VBox>
     </children>

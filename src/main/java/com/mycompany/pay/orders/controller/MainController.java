@@ -8,6 +8,8 @@ import com.mycompany.pay.orders.dao.ClientesDAO;
 import com.mycompany.pay.orders.dao.ClientesDAOImpl;
 import com.mycompany.pay.orders.dao.ProductosDAO;
 import com.mycompany.pay.orders.dao.ProductosDAOImpl;
+import com.mycompany.pay.orders.dao.TasadeCambioDAO;
+import com.mycompany.pay.orders.dao.TasadeCambioDAOImpl;
 import com.mycompany.pay.orders.dao.UsuarioDAO;
 import com.mycompany.pay.orders.dao.UsuarioDAOImpl;
 
@@ -21,6 +23,9 @@ import javafx.scene.layout.StackPane;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 public class MainController {
 
@@ -64,6 +69,33 @@ public class MainController {
         }
     }
 
+    
+ @FXML
+private void abrirModuloClientes() {
+    try {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/ClientesForm.fxml"));
+        Parent root = loader.load();
+
+        Connection connection = DriverManager.getConnection(
+            "jdbc:postgresql://localhost:5432/pay_orders_db",
+            "admin",
+            "admin123"
+        );
+
+        ClientesDAO clientesDAO = new ClientesDAOImpl(connection);
+        ClientesController clientesController = new ClientesController(clientesDAO);
+
+        ClientesFormController clientesFormController = loader.getController();
+        clientesFormController.setClientesController(clientesController);
+
+        panelContenido.getChildren().clear();
+        panelContenido.getChildren().add(root);
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        mostrarAlertaError("Error", "No se pudo abrir módulo de clientes: " + e.getMessage());
+    }
+}
     @FXML
     private void abrirPanelMateriaPrima() {
         try {
@@ -86,7 +118,42 @@ public class MainController {
             e.printStackTrace();
             mostrarAlertaError("Error al cargar vista Materia Prima", e.getMessage());
         }
+    }@FXML
+private void abrirModalTasasCambio() {
+    try {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mycompany/pay/orders/view/TasaCambioFormView.fxml"));
+        Parent root = loader.load();
+
+        Connection connection = DriverManager.getConnection(
+                "jdbc:postgresql://localhost:5432/pay_orders_db",
+                "admin",
+                "admin123"
+        );
+
+        TasadeCambioDAO tasaCambioDAO = new TasadeCambioDAOImpl(connection);
+        TasadeCambioController tasaCambioController = new TasadeCambioController(tasaCambioDAO);
+
+        TasaCambioFormController tasaController = loader.getController();
+        tasaController.setTasaCambioController(tasaCambioController);
+        tasaController.cargarTasasExistentes(); // para mostrar tabla con tasas actuales
+
+        Stage stage = new Stage();
+        stage.setTitle("Gestión de Tasas de Cambio");
+        stage.setScene(new Scene(root));
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setWidth(600);
+        stage.setHeight(450);
+        stage.setMinWidth(550);
+        stage.setMinHeight(400);
+
+        stage.show(); 
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        mostrarAlertaError("Error al abrir modal Tasas de Cambio", e.getMessage());
     }
+}
+
 
     @FXML
     private void abrirPanelProductos() {
@@ -129,6 +196,10 @@ public class MainController {
             mostrarAlertaError("Error al cargar vista", "No se pudo cargar la vista: " + rutaFXML + "\nDetalles: " + e.getMessage());
         }
     }
+@FXML
+private void abrirGestionTasas() {
+    abrirModalTasasCambio();
+}
 
     @FXML
     private void handleCerrarSesion() {
